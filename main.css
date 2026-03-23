@@ -112,11 +112,16 @@ hgroup,
 menu,
 nav,
 section {
+	max-width: 1000px;
+	margin: 0 auto;
 	display: block;
+
 }
 
 body {
 	line-height: 1;
+	padding-left: 40px;
+	padding-right: 40px;
 }
 
 ol,
@@ -285,7 +290,7 @@ a {
 	-ms-transition: border-bottom-color 0.2s ease, color 0.2s ease;
 	transition: border-bottom-color 0.2s ease, color 0.2s ease;
 	text-decoration: none;
-	color: #585858;
+	color: #1c1c1c;
 	border-bottom: dotted 1px rgba(88, 88, 88, 0.5);
 }
 
@@ -306,6 +311,9 @@ i {
 
 p {
 	margin: 0 0 2em 0;
+	line-height: 1.6;
+	margin-bottom: 20px;
+	padding: 0 15px;
 }
 
 h1 {
