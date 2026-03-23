@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WISSEN.WERKZEUG – Rechnungsformular</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+
+  .toolbar {
+    background: #1A3A5C;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .toolbar h1 {
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .toolbar-sub {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+
+  .btn-original {
+    background: #1A6B3C;
+    color: white;
+  }
+
+  .btn-anonym {
+    background: #C25A00;
+    color: white;
+  }
+
+  .btn-print {
+    background: #ffffff33;
+    color: white;
+    border: 1px solid #ffffff55;
+  }
+
+  .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* FILENAME PREVIEW */
+  .filename-preview {
+    background: #1E1E1E;
+    color: #A8D8A8;
+    font-family: monospace;
+    font-size: 13px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .filename-label {
+    color: #888;
+    white-space: nowrap;
+    font-size: 11px;
+  }
+
+  #filename-display {
+    color: #FFD700;
+    word-break: break-all;
+  }
+
+  /* META FIELDS */
+  .meta-bar {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .meta-bar label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .meta-bar select,
+  .meta-bar input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    background: #f9f9f9;
+  }
+
+  /* RECHNUNG */
+  .invoice {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* KOPF – SCHICHT 1 PRIVAT */
+  .invoice-header {
+    background: #f8f9fa;
+    border-bottom: 3px solid #1A3A5C;
+    padding: 24px;
+    position: relative;
+  }
+
+  .privacy-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #FDEAEA;
+    color: #8B1A1A;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #cc000033;
+  }
+
+  .header-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field-group label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .field-group input,
+  .field-group textarea {
+    padding: 8px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    background: white;
+    transition: border-color 0.2s;
+  }
+
+  .field-group input:focus,
+  .field-group textarea:focus {
+    outline: none;
+    border-color: #1A3A5C;
+  }
+
+  .field-group textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .invoice-number-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+  }
+
+  /* MITTELTEIL – SCHICHT 2 KERN */
+  .invoice-body {
+    padding: 24px;
+    border-bottom: 2px solid #eee;
+  }
+
+  .section-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+  }
+
+  /* POSITIONEN */
+  .positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+  }
+
+  .positions-table th {
+    background: #1A3A5C;
+    color: white;
+    padding: 8px 10px;
+    font-size: 12px;
+    text-align: left;
+  }
+
+  .positions-table th:last-child,
+  .positions-table th:nth-last-child(2),
+  .positions-table th:nth-last-child(3) {
+    text-align: right;
+  }
+
+  .positions-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+  }
+
+  .positions-table tr:nth-child(even) td {
+    background: #f9fbff;
+  }
+
+  .positions-table input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    padding: 2px 0;
+  }
+
+  .positions-table input:focus {
+    outline: none;
+    background: #fff9e6;
+    border-radius: 3px;
+    padding: 2px 4px;
+  }
+
+  .pos-nr { width: 40px; text-align: center; color: #888; font-size: 12px; }
+  .pos-desc { min-width: 200px; }
+  .pos-menge { width: 70px; }
+  .pos-menge input, .pos-einzel input, .pos-gesamt input { text-align: right; }
+  .pos-einzel { width: 100px; }
+  .pos-gesamt { width: 100px; font-weight: bold; }
+  .pos-del { width: 30px; text-align: center; }
+
+  .pos-del button {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .pos-del button:hover { color: #cc0000; }
+
+  .add-pos-btn {
+    background: none;
+    border: 1px dashed #1A3A5C;
+    color: #1A3A5C;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .add-pos-btn:hover { background: #E8F0F8; }
+
+  /* SUMMEN */
+  .totals {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .totals-box {
+    width: 280px;
+  }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .totals-row.total {
+    font-weight: bold;
+    font-size: 15px;
+    border-top: 2px solid #1A3A5C;
+    border-bottom: none;
+    padding-top: 10px;
+    margin-top: 4px;
+    color: #1A3A5C;
+  }
+
+  .totals-row select {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 12px;
+    background: #f9f9f9;
+  }
+
+  /* FUSSZEILE – SCHICHT 1 PRIVAT */
+  .invoice-footer {
+    background: #f8f9fa;
+    padding: 20px 24px;
+    border-top: 2px solid #eee;
+    position: relative;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .footer-field label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .footer-field input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 12px;
+    background: white;
+  }
+
+  .footer-field input:focus {
+    outline: none;
+    border-color: #1A3A5C;
+  }
+
+  /* ANONYM OVERLAY */
+  .anonym-indicator {
+    display: none;
+    background: #FDF0E6;
+    border: 2px dashed #C25A00;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #C25A00;
+    text-align: center;
+    margin: 4px 24px;
+  }
+
+  /* PRINT */
+  @media print {
+    body { background: white; padding: 0; }
+    .toolbar { display: none; }
+    .meta-bar { display: none; }
+    .filename-preview { display: none; }
+    .add-pos-btn { display: none; }
+    .pos-del { display: none; }
+    .invoice { border: none; box-shadow: none; border-radius: 0; }
+    input, textarea, select { border: none !important; background: transparent !important; }
+    .positions-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .invoice-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .privacy-badge { display: none; }
+
+    .hide-on-print { display: none !important; }
+    .anonym-hidden { visibility: hidden; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div>
+    <div class="toolbar-sub">WISSEN.WERKZEUG</div>
+    <h1>RECHNUNGSFORMULAR</h1>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-print" onclick="window.print()">🖨️ Drucken</button>
+    <button class="btn btn-original" onclick="saveOriginal()">💾 Speichern (Original)</button>
+    <button class="btn btn-anonym" onclick="saveAnonym()">🔒 Speichern (Anonym)</button>
+  </div>
+</div>
+
+<!-- DATEINAME PREVIEW -->
+<div class="filename-preview">
+  <span class="filename-label">Dateiname:</span>
+  <span id="filename-display">AUS_____2026-03_____EUR.ww</span>
+</div>
+
+<!-- META FELDER FÜR MASCHINENSPRACHE -->
+<div class="meta-bar">
+  <div>
+    <label>Typ</label>
+    <select id="meta-typ" onchange="updateFilename()">
+      <option value="AUS">AUS – Ausgangsrechnung</option>
+      <option value="EIN">EIN – Eingangsrechnung</option>
+      <option value="GUT">GUT – Gutschrift</option>
+    </select>
+  </div>
+  <div>
+    <label>Branche</label>
+    <select id="meta-branche" onchange="updateFilename()">
+      <option value="">– wählen –</option>
+      <option value="HAND">Handwerk</option>
+      <option value="TECH">Technik / IT</option>
+      <option value="KREA">Kreativ / Kunst</option>
+      <option value="BERA">Beratung</option>
+      <option value="BILD">Bildung</option>
+      <option value="MED">Medizin / Gesundheit</option>
+      <option value="BAU">Bau / Sanierung</option>
+      <option value="GAST">Gastronomie</option>
+      <option value="HAND2">Handel</option>
+      <option value="SONST">Sonstiges</option>
+    </select>
+  </div>
+  <div>
+    <label>Jahr</label>
+    <select id="meta-jahr" onchange="updateFilename()"></select>
+  </div>
+  <div>
+    <label>Monat</label>
+    <select id="meta-monat" onchange="updateFilename()">
+      <option value="01">Januar</option>
+      <option value="02">Februar</option>
+      <option value="03">März</option>
+      <option value="04">April</option>
+      <option value="05">Mai</option>
+      <option value="06">Juni</option>
+      <option value="07">Juli</option>
+      <option value="08">August</option>
+      <option value="09">September</option>
+      <option value="10">Oktober</option>
+      <option value="11">November</option>
+      <option value="12">Dezember</option>
+    </select>
+  </div>
+  <div>
+    <label>Kategorie</label>
+    <select id="meta-kategorie" onchange="updateFilename()">
+      <option value="BE">BE – Berechenbar</option>
+      <option value="ZA">ZA – Zeitabhängig</option>
+      <option value="KO">KO – Kontextuell</option>
+    </select>
+  </div>
+</div>
+
+<!-- RECHNUNG -->
+<div class="invoice">
+
+  <!-- KOPF: SCHICHT 1 PRIVAT -->
+  <div class="invoice-header" id="invoice-header">
+    <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
+    <div class="header-grid">
+      <div class="field-group">
+        <label>Absender – Name / Firma</label>
+        <input type="text" id="absender-name" placeholder="Dein Name oder Firmenname" oninput="updateFilename()">
+        <label>Adresse</label>
+        <textarea id="absender-adresse" placeholder="Straße, PLZ Ort"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Empfänger – Name / Firma</label>
+        <input type="text" id="empfaenger-name" placeholder="Empfänger Name oder Firma">
+        <label>Adresse Empfänger</label>
+        <textarea id="empfaenger-adresse" placeholder="Straße, PLZ Ort"></textarea>
+      </div>
+    </div>
+    <div class="invoice-number-row">
+      <div class="field-group">
+        <label>Rechnungsnummer</label>
+        <input type="text" id="rechnungsnr" placeholder="z.B. 2026-001">
+      </div>
+      <div class="field-group">
+        <label>Rechnungsdatum</label>
+        <input type="date" id="rechnungsdatum">
+      </div>
+      <div class="field-group">
+        <label>Leistungsdatum</label>
+        <input type="date" id="leistungsdatum">
+      </div>
+    </div>
+  </div>
+
+  <!-- ANONYM HINWEIS -->
+  <div class="anonym-indicator" id="anonym-indicator">
+    🔒 ANONYM-MODUS: Kopf und Fußzeile werden beim Speichern entfernt
+  </div>
+
+  <!-- MITTELTEIL: SCHICHT 2 KERN -->
+  <div class="invoice-body">
+    <div class="section-label">Leistungsbeschreibung</div>
+
+    <div class="field-group" style="margin-bottom:16px;">
+      <label>Betreff / Kurzbeschreibung der Leistung</label>
+      <input type="text" id="betreff" placeholder="z.B. Webdesign Projekt, Reparatur Heizung, Beratungsleistung..." oninput="updateFilename()" style="font-size:14px; padding:10px;">
+    </div>
+
+    <div class="section-label">Positionen</div>
+
+    <table class="positions-table" id="positions-table">
+      <thead>
+        <tr>
+          <th class="pos-nr">Nr.</th>
+          <th class="pos-desc">Beschreibung</th>
+          <th class="pos-menge" style="text-align:right">Menge</th>
+          <th class="pos-menge" style="text-align:right">Einheit</th>
+          <th class="pos-einzel" style="text-align:right">Einzelpreis</th>
+          <th class="pos-gesamt" style="text-align:right">Gesamt</th>
+          <th class="pos-del"></th>
+        </tr>
+      </thead>
+      <tbody id="positions-body">
+      </tbody>
+    </table>
+
+    <button class="add-pos-btn" onclick="addPosition()">+ Position hinzufügen</button>
+
+    <!-- SUMMEN -->
+    <div class="totals">
+      <div class="totals-box">
+        <div class="totals-row">
+          <span>Nettobetrag</span>
+          <span id="netto">0,00 €</span>
+        </div>
+        <div class="totals-row">
+          <span>MwSt 
+            <select id="mwst-satz" onchange="recalc()">
+              <option value="0">0%</option>
+              <option value="7">7%</option>
+              <option value="19" selected>19%</option>
+            </select>
+          </span>
+          <span id="mwst-betrag">0,00 €</span>
+        </div>
+        <div class="totals-row total">
+          <span>Gesamtbetrag</span>
+          <span id="gesamt-display">0,00 €</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group" style="margin-top:20px;">
+      <label>Zahlungsbedingungen / Hinweise</label>
+      <input type="text" id="zahlungsbedingungen" placeholder="z.B. Zahlbar innerhalb von 14 Tagen ohne Abzug">
+    </div>
+  </div>
+
+  <!-- FUSSZEILE: SCHICHT 1 PRIVAT -->
+  <div class="invoice-footer" id="invoice-footer">
+    <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
+    <div class="footer-grid">
+      <div class="footer-field">
+        <label>Bank / IBAN</label>
+        <input type="text" id="iban" placeholder="DE00 0000 0000 0000 0000 00">
+      </div>
+      <div class="footer-field">
+        <label>Steuernummer / USt-ID</label>
+        <input type="text" id="steuernr" placeholder="DE123456789">
+      </div>
+      <div class="footer-field">
+        <label>Kontakt / Email / Web</label>
+        <input type="text" id="kontakt" placeholder="email@beispiel.de">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let positionCount = 0;
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  // Jahr befüllen
+  const jahrSelect = document.getElementById('meta-jahr');
+  const now = new Date();
+  for (let y = now.getFullYear(); y >= 2020; y--) {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    if (y === now.getFullYear()) opt.selected = true;
+    jahrSelect.appendChild(opt);
+  }
+  // Monat setzen
+  document.getElementById('meta-monat').value = String(now.getMonth() + 1).padStart(2, '0');
+  // Datum setzen
+  document.getElementById('rechnungsdatum').value = now.toISOString().split('T')[0];
+  // Erste Position
+  addPosition();
+  updateFilename();
+});
+
+function addPosition() {
+  positionCount++;
+  const tbody = document.getElementById('positions-body');
+  const tr = document.createElement('tr');
+  tr.id = `pos-${positionCount}`;
+  tr.innerHTML = `
+    <td class="pos-nr">${positionCount}</td>
+    <td class="pos-desc"><input type="text" placeholder="Leistung beschreiben..." oninput="updateFilename()"></td>
+    <td class="pos-menge"><input type="number" value="1" min="0" step="0.01" oninput="recalcRow(this); recalc()"></td>
+    <td class="pos-menge"><input type="text" value="Std." placeholder="Stk/Std."></td>
+    <td class="pos-einzel"><input type="number" value="0" min="0" step="0.01" oninput="recalcRow(this); recalc()"></td>
+    <td class="pos-gesamt"><input type="number" value="0" readonly style="font-weight:bold; color:#1A3A5C;"></td>
+    <td class="pos-del"><button onclick="removePosition(${positionCount})" title="Entfernen">×</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function removePosition(id) {
+  const row = document.getElementById(`pos-${id}`);
+  if (row) row.remove();
+  recalc();
+}
+
+function recalcRow(input) {
+  const row = input.closest('tr');
+  const inputs = row.querySelectorAll('input[type="number"]');
+  const menge = parseFloat(inputs[0].value) || 0;
+  const einzel = parseFloat(inputs[1].value) || 0;
+  inputs[2].value = (menge * einzel).toFixed(2);
+}
+
+function recalc() {
+  const rows = document.querySelectorAll('#positions-body tr');
+  let netto = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input[type="number"]');
+    if (inputs.length >= 3) netto += parseFloat(inputs[2].value) || 0;
+  });
+  const mwstSatz = parseInt(document.getElementById('mwst-satz').value);
+  const mwst = netto * mwstSatz / 100;
+  const gesamt = netto + mwst;
+  document.getElementById('netto').textContent = fmt(netto);
+  document.getElementById('mwst-betrag').textContent = fmt(mwst);
+  document.getElementById('gesamt-display').textContent = fmt(gesamt);
+  updateFilename();
+}
+
+function fmt(n) {
+  return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+function getGesamtRaw() {
+  const rows = document.querySelectorAll('#positions-body tr');
+  let netto = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input[type="number"]');
+    if (inputs.length >= 3) netto += parseFloat(inputs[2].value) || 0;
+  });
+  const mwstSatz = parseInt(document.getElementById('mwst-satz').value);
+  return Math.round(netto * (1 + mwstSatz / 100));
+}
+
+function updateFilename() {
+  const typ = document.getElementById('meta-typ').value || 'AUS';
+  const branche = document.getElementById('meta-branche').value || '____';
+  const jahr = document.getElementById('meta-jahr').value || '2026';
+  const monat = document.getElementById('meta-monat').value || '01';
+  const betreff = document.getElementById('betreff')?.value
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9\-äöüÄÖÜß]/g, '')
+    .substring(0, 20) || '____';
+  const betrag = getGesamtRaw();
+  const kat = document.getElementById('meta-kategorie').value || 'BE';
+  const name = `${typ}_${branche}_${jahr}-${monat}_${betreff}_${betrag}EUR_${kat}.ww`;
+  document.getElementById('filename-display').textContent = name;
+  return name;
+}
+
+function buildData(anonym) {
+  const rows = document.querySelectorAll('#positions-body tr');
+  const positionen = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    positionen.push({
+      beschreibung: inputs[0]?.value || '',
+      menge: inputs[1]?.value || '',
+      einheit: inputs[2]?.value || '',
+      einzelpreis: inputs[3]?.value || '',
+      gesamt: inputs[4]?.value || ''
+    });
+  });
+
+  const kern = {
+    typ: document.getElementById('meta-typ').value,
+    branche: document.getElementById('meta-branche').value,
+    periode: `${document.getElementById('meta-jahr').value}-${document.getElementById('meta-monat').value}`,
+    kategorie: document.getElementById('meta-kategorie').value,
+    betreff: document.getElementById('betreff').value,
+    positionen,
+    netto: document.getElementById('netto').textContent,
+    mwst_satz: document.getElementById('mwst-satz').value + '%',
+    mwst_betrag: document.getElementById('mwst-betrag').textContent,
+    gesamt: document.getElementById('gesamt-display').textContent,
+    zahlungsbedingungen: document.getElementById('zahlungsbedingungen').value,
+  };
+
+  if (anonym) return { schicht: 'KERN_ONLY_ANONYM', daten: kern };
+
+  return {
+    schicht: 'VOLLSTAENDIG',
+    privat: {
+      absender_name: document.getElementById('absender-name').value,
+      absender_adresse: document.getElementById('absender-adresse').value,
+      empfaenger_name: document.getElementById('empfaenger-name').value,
+      empfaenger_adresse: document.getElementById('empfaenger-adresse').value,
+      rechnungsnr: document.getElementById('rechnungsnr').value,
+      rechnungsdatum: document.getElementById('rechnungsdatum').value,
+      leistungsdatum: document.getElementById('leistungsdatum').value,
+      iban: document.getElementById('iban').value,
+      steuernr: document.getElementById('steuernr').value,
+      kontakt: document.getElementById('kontakt').value,
+    },
+    kern
+  };
+}
+
+function saveOriginal() {
+  const filename = updateFilename().replace('AUS_', 'ORIG_AUS_');
+  const data = buildData(false);
+  downloadJSON(data, filename);
+}
+
+function saveAnonym() {
+  const filename = updateFilename().replace(/^[A-Z]+_/, 'ANON_');
+  const data = buildData(true);
+  downloadJSON(data, filename);
+}
+
+function downloadJSON(data, filename) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
