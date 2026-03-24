@@ -289,6 +289,19 @@
     <button class="btn btn-original"     onclick="saveOriginal()">💾 Speichern</button>
     <button class="btn btn-anonym"       onclick="saveAnonym()">🔒 Anonym</button>
     <button class="btn btn-zu-rechnung"  onclick="zuRechnung()">⚡ → Rechnung</button>
+    <div>
+    <label>Wissenskategorie</label>
+    <select id="meta-wk" onchange="updateFilename()">
+      <option value="WK0">– WK wählen –</option>
+      <option value="WK1">WK1 – Berechenbare Logik</option>
+      <option value="WK2">WK2 – Physikalisch-empirisch</option>
+      <option value="WK3">WK3 – Kontextuelles Wissen</option>
+      <option value="WK4">WK4 – Kulturelles Wissen</option>
+      <option value="WK5">WK5 – Zeitabhängiges Wissen</option>
+      <option value="WK6">WK6 – Perspektivisches Wissen</option>
+      <option value="WK7">WK7 – Emotionales Wissen</option>
+      <option value="WK8">WK8 – Metawissen</option>
+    </select>
   </div>
 </div>
 
@@ -667,7 +680,8 @@ function updateFilename() {
   const betreff = (document.getElementById('betreff')?.value || '')
     .replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-äöüÄÖÜß]/g,'').substring(0,20) || '____';
   const betrag = getGesamtRaw();
-  const name = `${typ}_${branche}_${jahr}-${monat}_${betreff}_${betrag}EUR_${status}_${kat}.ww`;
+  const wk = document.getElementById('meta-wk')?.value || 'WK0';
+  const name = `${typ}_${branche}_${jahr}-${monat}_${betreff}_${betrag}EUR_${status}_${wk}_${kat}.ww`;
   document.getElementById('filename-display').textContent = name;
   return name;
 }
@@ -702,6 +716,7 @@ function buildData(anonym) {
     gueltig_bis:   document.getElementById('gueltig-bis').value,
     lieferdatum:   document.getElementById('lieferdatum').value,
     betreff:       document.getElementById('betreff').value,
+    wissenskategorie: document.getElementById('meta-wk')?.value || 'WK0',
     positionen,
     netto:         document.getElementById('netto').textContent,
     mwst_satz:     document.getElementById('mwst-satz').value + '%',

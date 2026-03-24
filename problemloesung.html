@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WISSEN.WERKZEUG – Problemlösungsblatt</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    padding: 12px;
+    color: #1a1a1a;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    background: #8B2500;
+    color: white;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .toolbar h1 { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+  .toolbar-sub { font-size: 11px; opacity: 0.6; letter-spacing: 1px; margin-bottom: 2px; }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 14px; border: none; border-radius: 6px;
+    cursor: pointer; font-size: 13px; font-weight: bold;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-save   { background: #1A6B3C; color: white; }
+  .btn-anonym { background: #C25A00; color: white; }
+  .btn-print  { background: #ffffff33; color: white; border: 1px solid #ffffff55; }
+  .btn:hover  { opacity: 0.85; transform: translateY(-1px); }
+
+  /* ── DATEINAME ── */
+  .filename-preview {
+    background: #1E1E1E; color: #A8D8A8;
+    font-family: monospace; font-size: 12px;
+    padding: 9px 14px; border-radius: 6px; margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+  }
+  .filename-label { color: #888; font-size: 11px; white-space: nowrap; padding-top: 1px; }
+  #filename-display { color: #FFD700; word-break: break-all; }
+
+  /* ── WK-BADGE ── */
+  .wk-bar {
+    background: white; border: 1px solid #ddd;
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .wk-bar-label {
+    font-size: 10px; color: #666; text-transform: uppercase;
+    letter-spacing: 0.5px; font-weight: bold; white-space: nowrap;
+  }
+  .wk-select {
+    flex: 1; min-width: 220px; padding: 8px 10px;
+    border: 2px solid #8B2500; border-radius: 6px;
+    font-size: 13px; font-weight: bold; background: #FFF5F2; color: #8B2500;
+    cursor: pointer;
+  }
+  .wk-select:focus { outline: none; border-color: #C23A00; }
+  .wk-desc {
+    font-size: 12px; color: #888; font-style: italic;
+    flex: 1; min-width: 180px;
+  }
+  .wk-badge {
+    background: #8B2500; color: white; font-size: 11px; font-weight: bold;
+    padding: 4px 12px; border-radius: 12px; white-space: nowrap;
+    font-family: monospace; letter-spacing: 0.5px;
+  }
+
+  /* ── META-BAR ── */
+  .meta-bar {
+    background: white; border: 1px solid #ddd;
+    border-radius: 8px; padding: 14px; margin-bottom: 12px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+  }
+  .meta-bar label {
+    font-size: 10px; color: #666; text-transform: uppercase;
+    letter-spacing: 0.5px; display: block; margin-bottom: 4px;
+  }
+  .meta-bar select, .meta-bar input {
+    width: 100%; padding: 7px 8px; border: 1px solid #ddd;
+    border-radius: 4px; font-size: 13px; background: #f9f9f9;
+  }
+
+  /* ── SHEET ── */
+  .sheet {
+    background: white; border: 1px solid #ddd;
+    border-radius: 8px; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* KOPF */
+  .sheet-header {
+    background: linear-gradient(135deg, #8B2500 0%, #C23A00 100%);
+    padding: 20px 16px; position: relative;
+  }
+  .privacy-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: #FDEAEA; color: #8B1A1A; font-size: 10px;
+    padding: 2px 8px; border-radius: 10px; border: 1px solid #cc000033;
+  }
+  .header-typ-badge {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3); color: white;
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 12px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label {
+    font-size: 10px; color: rgba(255,255,255,0.6);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .field-group input,
+  .field-group textarea,
+  .field-group select {
+    padding: 8px 10px; border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 4px; font-size: 13px; font-family: Arial, sans-serif;
+    background: rgba(255,255,255,0.12); color: white; width: 100%;
+    transition: border-color 0.2s;
+  }
+  .field-group input::placeholder,
+  .field-group textarea::placeholder { color: rgba(255,255,255,0.4); }
+  .field-group input:focus,
+  .field-group textarea:focus { outline: none; border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.2); }
+  .field-group select option { background: #8B2500; }
+  .field-group textarea { resize: vertical; min-height: 52px; }
+
+  .header-meta-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* ── SEKTIONEN ── */
+  .sheet-section { border-bottom: 1px solid #f0f0f0; }
+  .section-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; cursor: pointer; user-select: none;
+  }
+  .section-bar:hover { background: #fafafa; }
+  .section-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #8B2500; color: white; font-size: 12px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .section-title { font-size: 14px; font-weight: bold; color: #8B2500; flex: 1; }
+  .section-toggle { font-size: 18px; color: #bbb; transition: transform 0.3s; line-height: 1; }
+  .section-toggle.open { transform: rotate(180deg); }
+  .section-body { padding: 0 16px 16px; display: grid; gap: 12px; }
+
+  /* FELDER */
+  .light-label {
+    font-size: 10px; color: #999; text-transform: uppercase;
+    letter-spacing: 0.5px; display: block; margin-bottom: 4px;
+  }
+  .light-input, .light-textarea, .light-select {
+    width: 100%; padding: 8px 10px; border: 1px solid #e8e8e8;
+    border-radius: 4px; font-size: 13px; font-family: Arial, sans-serif;
+    background: #fafafa; transition: border-color 0.2s;
+  }
+  .light-input:focus, .light-textarea:focus, .light-select:focus {
+    outline: none; border-color: #8B2500; background: white;
+  }
+  .light-textarea { resize: vertical; min-height: 70px; }
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* URSACHEN-LISTE */
+  .ursache-row {
+    display: grid; grid-template-columns: 28px 1fr 100px 32px; gap: 8px; align-items: center;
+    padding: 5px 0; border-bottom: 1px solid #f5f5f5;
+  }
+  .ursache-nr {
+    background: #FFF0ED; color: #8B2500; font-size: 11px; font-weight: bold;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .add-btn {
+    background: none; border: 1px dashed #8B2500; color: #8B2500;
+    padding: 7px 14px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; width: 100%; transition: all 0.2s; margin-top: 8px;
+  }
+  .add-btn:hover { background: #FFF0ED; }
+  .del-btn {
+    background: none; border: none; color: #ccc;
+    cursor: pointer; font-size: 16px; padding: 0; line-height: 1;
+  }
+  .del-btn:hover { color: #cc0000; }
+
+  /* LÖSUNGEN-KARTEN */
+  .loesung-card {
+    border: 1px solid #e8e8e8; border-radius: 6px; padding: 12px;
+    background: #FFFAF8; position: relative;
+  }
+  .loesung-card-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+  }
+  .loesung-nr {
+    background: #8B2500; color: white; font-size: 11px; font-weight: bold;
+    padding: 2px 10px; border-radius: 10px;
+  }
+  .bewertung-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px;
+  }
+  .stern-rating { display: flex; gap: 3px; }
+  .stern {
+    font-size: 20px; cursor: pointer; color: #ddd; line-height: 1;
+    transition: color 0.15s;
+  }
+  .stern.aktiv { color: #F39C12; }
+
+  /* ENTSCHEIDUNGS-BOX */
+  .entscheidung-box {
+    background: #FFF5F2; border: 2px solid #8B2500;
+    border-radius: 8px; padding: 14px;
+  }
+  .entscheidung-status {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .status-btn {
+    padding: 6px 14px; border: 2px solid #ddd; border-radius: 16px;
+    cursor: pointer; font-size: 12px; font-weight: bold;
+    background: white; color: #888; transition: all 0.2s;
+  }
+  .status-btn.active-ja     { background: #1A6B3C; color: white; border-color: #1A6B3C; }
+  .status-btn.active-nein   { background: #8B2500; color: white; border-color: #8B2500; }
+  .status-btn.active-offen  { background: #C25A00; color: white; border-color: #C25A00; }
+
+  /* MASSNAHMEN */
+  .massnahme-row {
+    display: grid; grid-template-columns: 1fr 120px 100px 32px; gap: 8px;
+    align-items: center; padding: 5px 0; border-bottom: 1px solid #f5f5f5;
+  }
+
+  /* PRINT */
+  @media print {
+    body { background: white; padding: 0; }
+    .toolbar, .meta-bar, .filename-preview, .wk-bar .wk-select,
+    .add-btn, .del-btn, .privacy-badge { display: none !important; }
+    .sheet { border: none; box-shadow: none; border-radius: 0; }
+    input, textarea, select { border: none !important; background: transparent !important; color: #1a1a1a !important; }
+    .sheet-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .wk-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* MOBIL */
+  @media (max-width: 640px) {
+    body { padding: 8px; }
+    .toolbar { flex-direction: column; align-items: flex-start; }
+    .btn-group { width: 100%; }
+    .btn { flex: 1; text-align: center; font-size: 12px; padding: 9px 4px; }
+    .meta-bar { grid-template-columns: 1fr 1fr; }
+    .header-grid { grid-template-columns: 1fr; }
+    .header-meta-row { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .three-col { grid-template-columns: 1fr 1fr; }
+    .bewertung-row { grid-template-columns: 1fr 1fr; }
+    .ursache-row { grid-template-columns: 24px 1fr 80px 28px; }
+    .massnahme-row { grid-template-columns: 1fr 90px 80px 28px; }
+    .wk-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div>
+    <div class="toolbar-sub">WISSEN.WERKZEUG</div>
+    <h1>PROBLEMLÖSUNGSBLATT</h1>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-print"  onclick="window.print()">🖨️ Drucken</button>
+    <button class="btn btn-save"   onclick="saveOriginal()">💾 Speichern</button>
+    <button class="btn btn-anonym" onclick="saveAnonym()">🔒 Anonym</button>
+  </div>
+</div>
+
+<!-- WK-KATEGORIE (prominent) -->
+<div class="wk-bar">
+  <span class="wk-bar-label">🧠 Wissenskategorie</span>
+  <select class="wk-select" id="wk-kategorie" onchange="updateWK()">
+    <option value="">– Kategorie wählen –</option>
+    <option value="WK1">WK1 – Berechenbare Logik</option>
+    <option value="WK2">WK2 – Physikalisch-empirisch</option>
+    <option value="WK3">WK3 – Kontextuelles Wissen</option>
+    <option value="WK4">WK4 – Kulturelles Wissen</option>
+    <option value="WK5">WK5 – Zeitabhängiges Wissen</option>
+    <option value="WK6">WK6 – Perspektivisches Wissen</option>
+    <option value="WK7">WK7 – Emotionales Wissen</option>
+    <option value="WK8">WK8 – Metawissen</option>
+  </select>
+  <span class="wk-desc" id="wk-desc">Wähle die primäre Wissenskategorie dieses Problems</span>
+  <span class="wk-badge" id="wk-badge">– –</span>
+</div>
+
+<!-- DATEINAME -->
+<div class="filename-preview">
+  <span class="filename-label">Dateiname:</span>
+  <span id="filename-display">PLB_____2026-03_____WK0_OFFEN.ww</span>
+</div>
+
+<!-- META -->
+<div class="meta-bar">
+  <div>
+    <label>Dokumenttyp</label>
+    <select id="meta-typ" onchange="updateFilename()">
+      <option value="PLB">PLB – Problemlösung</option>
+      <option value="ANA">ANA – Analyse</option>
+      <option value="ENT">ENT – Entscheidung</option>
+      <option value="REF">REF – Reflexion</option>
+    </select>
+  </div>
+  <div>
+    <label>Bereich</label>
+    <select id="meta-bereich" onchange="updateFilename()">
+      <option value="">– wählen –</option>
+      <option value="TECH">Technik / IT</option>
+      <option value="WISS">Wissenschaft</option>
+      <option value="BERA">Beratung</option>
+      <option value="BILD">Bildung</option>
+      <option value="MED">Medizin / Gesundheit</option>
+      <option value="KREA">Kreativ / Kunst</option>
+      <option value="DIENST">Dienstleistungen</option>
+      <option value="SONST">Sonstiges</option>
+    </select>
+  </div>
+  <div>
+    <label>Jahr</label>
+    <select id="meta-jahr" onchange="updateFilename()"></select>
+  </div>
+  <div>
+    <label>Monat</label>
+    <select id="meta-monat" onchange="updateFilename()">
+      <option value="01">Januar</option><option value="02">Februar</option>
+      <option value="03">März</option><option value="04">April</option>
+      <option value="05">Mai</option><option value="06">Juni</option>
+      <option value="07">Juli</option><option value="08">August</option>
+      <option value="09">September</option><option value="10">Oktober</option>
+      <option value="11">November</option><option value="12">Dezember</option>
+    </select>
+  </div>
+  <div>
+    <label>Status</label>
+    <select id="meta-status" onchange="updateFilename()">
+      <option value="OFFEN">Offen</option>
+      <option value="IN-ARBEIT">In Arbeit</option>
+      <option value="GELOEST">Gelöst</option>
+      <option value="ESKALIERT">Eskaliert</option>
+      <option value="VERWORFEN">Verworfen</option>
+    </select>
+  </div>
+</div>
+
+<!-- SHEET -->
+<div class="sheet">
+
+  <!-- KOPF -->
+  <div class="sheet-header" id="sheet-header">
+    <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
+    <div class="header-typ-badge" id="typ-badge">Problemlösung</div>
+    <div class="header-grid">
+      <div class="field-group">
+        <label>Problemtitel</label>
+        <input type="text" id="problem-titel"
+               placeholder="Kurzer, präziser Titel des Problems"
+               oninput="updateFilename()" style="font-size:15px; font-weight:bold;">
+        <label style="margin-top:8px;">Problem in einem Satz</label>
+        <input type="text" id="problem-kurz"
+               placeholder="Was ist das Problem, wer ist betroffen, seit wann?">
+      </div>
+      <div class="field-group">
+        <label>Erstellt von</label>
+        <input type="text" id="erstellt-von" placeholder="Name oder Rolle">
+        <label style="margin-top:8px;">Betroffene Stelle / System</label>
+        <input type="text" id="betroffene-stelle"
+               placeholder="z.B. Buchhaltung, Produktion, Kunde X">
+      </div>
+    </div>
+    <div class="header-meta-row">
+      <div class="field-group">
+        <label>Datum des Auftretens</label>
+        <input type="date" id="datum-auftreten">
+      </div>
+      <div class="field-group">
+        <label>Ziel-Lösungsdatum</label>
+        <input type="date" id="datum-ziel">
+      </div>
+      <div class="field-group">
+        <label>Dringlichkeit</label>
+        <select id="dringlichkeit" style="background:rgba(255,255,255,0.12);color:white;border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:8px 10px;width:100%;font-size:13px;">
+          <option value="NORMAL">Normal</option>
+          <option value="HOCH">🔴 Hoch</option>
+          <option value="KRITISCH">🚨 Kritisch / Sofort</option>
+          <option value="NIEDRIG">🟢 Niedrig</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. PROBLEMBESCHREIBUNG -->
+  <div class="sheet-section">
+    <div class="section-bar" onclick="toggleSection('prob')">
+      <div class="section-icon">1</div>
+      <span class="section-title">Problembeschreibung</span>
+      <span class="section-toggle open" id="toggle-prob">▾</span>
+    </div>
+    <div class="section-body" id="body-prob">
+      <div>
+        <label class="light-label">Ausführliche Beschreibung — Was genau passiert?</label>
+        <textarea class="light-textarea" id="prob-beschreibung" style="min-height:90px;"
+          placeholder="Beschreibe das Problem so konkret wie möglich. Was passiert, was sollte passieren, unter welchen Bedingungen tritt es auf?"></textarea>
+      </div>
+      <div class="two-col">
+        <div>
+          <label class="light-label">Auswirkungen / Schaden</label>
+          <textarea class="light-textarea" id="prob-auswirkung" style="min-height:60px;"
+            placeholder="Welche Folgen hat das Problem? Wer oder was ist betroffen?"></textarea>
+        </div>
+        <div>
+          <label class="light-label">Bereits bekannte Fakten / Daten</label>
+          <textarea class="light-textarea" id="prob-fakten" style="min-height:60px;"
+            placeholder="Was wissen wir bereits sicher über das Problem?"></textarea>
+        </div>
+      </div>
+      <div class="two-col">
+        <div>
+          <label class="light-label">Wann tritt es auf? (Bedingungen)</label>
+          <input type="text" class="light-input" id="prob-wann"
+            placeholder="z.B. immer, nur bei X, seit Datum Y">
+        </div>
+        <div>
+          <label class="light-label">Was wurde bereits versucht?</label>
+          <input type="text" class="light-input" id="prob-versucht"
+            placeholder="Bisherige Lösungsversuche...">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. URSACHEN -->
+  <div class="sheet-section">
+    <div class="section-bar" onclick="toggleSection('urs')">
+      <div class="section-icon">2</div>
+      <span class="section-title">Ursachenanalyse</span>
+      <span class="section-toggle open" id="toggle-urs">▾</span>
+    </div>
+    <div class="section-body" id="body-urs">
+      <div>
+        <label class="light-label">Hypothetische Hauptursache</label>
+        <textarea class="light-textarea" id="urs-haupt" style="min-height:56px;"
+          placeholder="Was ist vermutlich die Wurzel des Problems?"></textarea>
+      </div>
+      <div>
+        <label class="light-label">Weitere mögliche Ursachen (nach Wahrscheinlichkeit)</label>
+        <div id="ursachen-list"></div>
+        <button class="add-btn" onclick="addUrsache()">+ Ursache hinzufügen</button>
+      </div>
+      <div class="two-col">
+        <div>
+          <label class="light-label">Beteiligte Wissenstypen (Querverbindung)</label>
+          <select class="light-select" id="urs-wk-verbindung">
+            <option value="">– weitere WK-Kategorie –</option>
+            <option value="WK1">WK1 – Berechenbare Logik</option>
+            <option value="WK2">WK2 – Physikalisch-empirisch</option>
+            <option value="WK3">WK3 – Kontextuelles Wissen</option>
+            <option value="WK4">WK4 – Kulturelles Wissen</option>
+            <option value="WK5">WK5 – Zeitabhängiges Wissen</option>
+            <option value="WK6">WK6 – Perspektivisches Wissen</option>
+            <option value="WK7">WK7 – Emotionales Wissen</option>
+            <option value="WK8">WK8 – Metawissen</option>
+          </select>
+        </div>
+        <div>
+          <label class="light-label">Datenqualität der Analyse</label>
+          <select class="light-select" id="urs-datenqualitaet">
+            <option value="HOCH">Hoch – gut belegt</option>
+            <option value="MITTEL" selected>Mittel – teilweise belegt</option>
+            <option value="NIEDRIG">Niedrig – Vermutung</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. LÖSUNGSANSÄTZE -->
+  <div class="sheet-section">
+    <div class="section-bar" onclick="toggleSection('loes')">
+      <div class="section-icon">3</div>
+      <span class="section-title">Lösungsansätze & Bewertung</span>
+      <span class="section-toggle open" id="toggle-loes">▾</span>
+    </div>
+    <div class="section-body" id="body-loes">
+      <div id="loesungen-list"></div>
+      <button class="add-btn" onclick="addLoesung()">+ Lösungsansatz hinzufügen</button>
+    </div>
+  </div>
+
+  <!-- 4. ENTSCHEIDUNG -->
+  <div class="sheet-section">
+    <div class="section-bar" onclick="toggleSection('ent')">
+      <div class="section-icon">4</div>
+      <span class="section-title">Entscheidung & Umsetzungsplan</span>
+      <span class="section-toggle open" id="toggle-ent">▾</span>
+    </div>
+    <div class="section-body" id="body-ent">
+      <div class="entscheidung-box">
+        <label class="light-label" style="margin-bottom:8px;">Wird ein Lösungsweg umgesetzt?</label>
+        <div class="entscheidung-status">
+          <button class="status-btn" id="ent-ja"    onclick="setEntscheidung('ja')">✅ Ja, umsetzen</button>
+          <button class="status-btn" id="ent-offen" onclick="setEntscheidung('offen')" >⏳ Noch offen</button>
+          <button class="status-btn" id="ent-nein"  onclick="setEntscheidung('nein')">❌ Kein Handeln</button>
+        </div>
+        <div>
+          <label class="light-label">Begründung der Entscheidung</label>
+          <textarea class="light-textarea" id="ent-begruendung"
+            placeholder="Warum wurde diese Entscheidung getroffen?"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <label class="light-label">Gewählter Lösungsweg (Zusammenfassung)</label>
+        <textarea class="light-textarea" id="ent-loesung"
+          placeholder="Welcher Ansatz wird konkret umgesetzt und warum?"></textarea>
+      </div>
+
+      <div>
+        <label class="light-label">Maßnahmen & Zuständigkeiten</label>
+        <div style="display:grid;grid-template-columns:1fr 120px 100px 32px;gap:8px;padding:0 0 6px;">
+          <span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Maßnahme</span>
+          <span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Zuständig</span>
+          <span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Bis wann</span>
+          <span></span>
+        </div>
+        <div id="massnahmen-list"></div>
+        <button class="add-btn" onclick="addMassnahme()">+ Maßnahme hinzufügen</button>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <label class="light-label">Erfolgskriterien — Woran messen wir Erfolg?</label>
+          <textarea class="light-textarea" id="ent-kriterien"
+            placeholder="z.B. Fehlerrate < 1%, Kundenzufriedenheit steigt..."></textarea>
+        </div>
+        <div>
+          <label class="light-label">Kontrolltermin / Review</label>
+          <input type="date" class="light-input" id="ent-review">
+          <label class="light-label" style="margin-top:8px;">Verantwortlich für Umsetzung</label>
+          <input type="text" class="light-input" id="ent-verantwortlich"
+            placeholder="Name oder Rolle">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. REFLEXION & LERNEFFEKT -->
+  <div class="sheet-section">
+    <div class="section-bar" onclick="toggleSection('ref')">
+      <div class="section-icon">5</div>
+      <span class="section-title">Reflexion & Lerneffekt</span>
+      <span class="section-toggle open" id="toggle-ref">▾</span>
+    </div>
+    <div class="section-body" id="body-ref">
+      <div class="two-col">
+        <div>
+          <label class="light-label">Was haben wir gelernt?</label>
+          <textarea class="light-textarea" id="ref-lernen"
+            placeholder="Welches Wissen entstand durch diesen Prozess?"></textarea>
+        </div>
+        <div>
+          <label class="light-label">Was kann verhindert werden in Zukunft?</label>
+          <textarea class="light-textarea" id="ref-praevention"
+            placeholder="Wie kann dieses Problem zukünftig vermieden werden?"></textarea>
+        </div>
+      </div>
+      <div>
+        <label class="light-label">KI-Trainingsrelevanz — Eignet sich dieser Fall für KI-Training?</label>
+        <select class="light-select" id="ref-ki-relevanz">
+          <option value="HOCH">Hoch – klarer Fall, gut dokumentiert</option>
+          <option value="MITTEL" selected>Mittel – mit Einschränkungen</option>
+          <option value="NIEDRIG">Niedrig – zu spezifisch oder unklar</option>
+          <option value="NEIN">Nein – nicht geeignet</option>
+        </select>
+      </div>
+      <div>
+        <label class="light-label">Interne Notizen (nicht im anonymen Export)</label>
+        <textarea class="light-textarea" id="ref-notizen"
+          style="background:#FFFBF0;border-color:#F0E8C8;"
+          placeholder="Persönliche Anmerkungen, vertrauliche Hintergründe..."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.sheet -->
+
+<script>
+// ── WISSENSKATEGORIEN ─────────────────────────────────────────────────────────
+const WK_BESCHREIBUNGEN = {
+  'WK1': 'Mathematik, Logik, Algorithmen, formale Systeme',
+  'WK2': 'Naturgesetze, Messungen, Experimente, Empirie',
+  'WK3': 'Situation, Umfeld, Abhängigkeiten, Kontext',
+  'WK4': 'Normen, Werte, Geschichte, gesellschaftl. Konventionen',
+  'WK5': 'Aktualität, Veränderung, Trends, historische Entwicklung',
+  'WK6': 'Standpunkte, Interpretationen, subjektive Sichtweisen',
+  'WK7': 'Gefühle, Motivation, menschl. Verhalten, Psychologie',
+  'WK8': 'Wissen über Wissen, Lernprozesse, Epistemologie',
+};
+
+let ursachenCount  = 0;
+let loesungenCount = 0;
+let massnahmenCount= 0;
+let entscheidung   = 'offen';
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const jahrSelect = document.getElementById('meta-jahr');
+  for (let y = now.getFullYear(); y >= 2018; y--) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    if (y === now.getFullYear()) opt.selected = true;
+    jahrSelect.appendChild(opt);
+  }
+  document.getElementById('meta-monat').value   = String(now.getMonth() + 1).padStart(2, '0');
+  document.getElementById('datum-auftreten').value = now.toISOString().split('T')[0];
+
+  addUrsache();
+  addLoesung();
+  addMassnahme();
+  setEntscheidung('offen');
+  updateFilename();
+});
+
+// ── WK UPDATE ─────────────────────────────────────────────────────────────────
+function updateWK() {
+  const val  = document.getElementById('wk-kategorie').value;
+  const desc = WK_BESCHREIBUNGEN[val] || 'Wähle die primäre Wissenskategorie dieses Problems';
+  document.getElementById('wk-desc').textContent  = val ? desc : 'Wähle die primäre Wissenskategorie dieses Problems';
+  document.getElementById('wk-badge').textContent = val || '– –';
+  updateFilename();
+}
+
+// ── SEKTIONEN ─────────────────────────────────────────────────────────────────
+function toggleSection(id) {
+  const body   = document.getElementById(`body-${id}`);
+  const toggle = document.getElementById(`toggle-${id}`);
+  const isOpen = body.style.display !== 'none';
+  body.style.display   = isOpen ? 'none' : 'grid';
+  toggle.classList.toggle('open', !isOpen);
+}
+
+// ── URSACHEN ──────────────────────────────────────────────────────────────────
+function addUrsache() {
+  ursachenCount++;
+  const id  = ursachenCount;
+  const div = document.createElement('div');
+  div.className = 'ursache-row';
+  div.id = `urs-${id}`;
+  div.innerHTML = `
+    <div class="ursache-nr">${id}</div>
+    <input type="text" class="light-input" placeholder="Mögliche Ursache beschreiben...">
+    <select class="light-select" style="font-size:12px;padding:6px 4px;">
+      <option value="WAHRSCHEINLICH">Wahrscheinlich</option>
+      <option value="MOEGLICH" selected>Möglich</option>
+      <option value="UNWAHRSCHEINLICH">Unwahrschl.</option>
+    </select>
+    <button class="del-btn" onclick="document.getElementById('urs-${id}').remove()">×</button>
+  `;
+  document.getElementById('ursachen-list').appendChild(div);
+}
+
+// ── LÖSUNGEN ──────────────────────────────────────────────────────────────────
+function addLoesung() {
+  loesungenCount++;
+  const id  = loesungenCount;
+  const div = document.createElement('div');
+  div.className = 'loesung-card';
+  div.id = `loes-${id}`;
+  div.innerHTML = `
+    <div class="loesung-card-header">
+      <span class="loesung-nr">Ansatz ${id}</span>
+      <button class="del-btn" onclick="document.getElementById('loes-${id}').remove()" style="font-size:18px;">×</button>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label class="light-label">Lösungsansatz</label>
+      <textarea class="light-textarea" style="min-height:56px;"
+        placeholder="Beschreibe den Lösungsansatz konkret..."></textarea>
+    </div>
+    <div class="bewertung-row">
+      <div>
+        <label class="light-label">Aufwand</label>
+        <div class="stern-rating" data-field="aufwand" id="aufwand-${id}" onclick="setStern(this, event)">
+          <span class="stern" data-val="1">★</span>
+          <span class="stern" data-val="2">★</span>
+          <span class="stern" data-val="3">★</span>
+          <span class="stern" data-val="4">★</span>
+          <span class="stern" data-val="5">★</span>
+        </div>
+      </div>
+      <div>
+        <label class="light-label">Erfolgswahrsch.</label>
+        <div class="stern-rating" data-field="erfolg" id="erfolg-${id}" onclick="setStern(this, event)">
+          <span class="stern" data-val="1">★</span>
+          <span class="stern" data-val="2">★</span>
+          <span class="stern" data-val="3">★</span>
+          <span class="stern" data-val="4">★</span>
+          <span class="stern" data-val="5">★</span>
+        </div>
+      </div>
+      <div>
+        <label class="light-label">Empfehlung</label>
+        <select class="light-select" style="font-size:12px;padding:5px 4px;">
+          <option value="BEVORZUGT">⭐ Bevorzugt</option>
+          <option value="ALTERNATIV" selected>Alternativ</option>
+          <option value="LETZTER-AUSWEG">Letzter Ausweg</option>
+          <option value="VERWERFEN">Verwerfen</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:10px;">
+      <label class="light-label">Risiken / Nachteile dieses Ansatzes</label>
+      <input type="text" class="light-input"
+        placeholder="Was könnte bei diesem Ansatz schiefgehen?">
+    </div>
+  `;
+  document.getElementById('loesungen-list').appendChild(div);
+}
+
+function setStern(container, event) {
+  const clicked = event.target.closest('.stern');
+  if (!clicked) return;
+  const val = parseInt(clicked.dataset.val);
+  container.querySelectorAll('.stern').forEach(s => {
+    s.classList.toggle('aktiv', parseInt(s.dataset.val) <= val);
+  });
+  container.dataset.value = val;
+}
+
+// ── MAßNAHMEN ─────────────────────────────────────────────────────────────────
+function addMassnahme() {
+  massnahmenCount++;
+  const id  = massnahmenCount;
+  const div = document.createElement('div');
+  div.className = 'massnahme-row';
+  div.id = `ms-${id}`;
+  div.innerHTML = `
+    <input type="text" class="light-input" placeholder="Maßnahme beschreiben...">
+    <input type="text" class="light-input" placeholder="Wer?">
+    <input type="date" class="light-input">
+    <button class="del-btn" onclick="document.getElementById('ms-${id}').remove()">×</button>
+  `;
+  document.getElementById('massnahmen-list').appendChild(div);
+}
+
+// ── ENTSCHEIDUNG ──────────────────────────────────────────────────────────────
+function setEntscheidung(status) {
+  entscheidung = status;
+  ['ja','offen','nein'].forEach(s => {
+    const btn = document.getElementById(`ent-${s}`);
+    btn.className = 'status-btn';
+    if (s === status) btn.classList.add(`active-${s}`);
+  });
+}
+
+// ── DATEINAME ─────────────────────────────────────────────────────────────────
+function updateFilename() {
+  const typ    = document.getElementById('meta-typ').value     || 'PLB';
+  const ber    = document.getElementById('meta-bereich').value || '____';
+  const jahr   = document.getElementById('meta-jahr').value    || '2026';
+  const monat  = document.getElementById('meta-monat').value   || '01';
+  const status = document.getElementById('meta-status').value  || 'OFFEN';
+  const wk     = document.getElementById('wk-kategorie').value || 'WK0';
+  const titel  = (document.getElementById('problem-titel')?.value || '')
+    .replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-äöüÄÖÜß]/g,'').substring(0,18) || '____';
+
+  // Typ-Badge
+  const typLabels = { PLB:'Problemlösung', ANA:'Analyse', ENT:'Entscheidung', REF:'Reflexion' };
+  document.getElementById('typ-badge').textContent = typLabels[typ] || typ;
+
+  const filename = `${typ}_${ber}_${jahr}-${monat}_${titel}_${wk}_${status}.ww`;
+  document.getElementById('filename-display').textContent = filename;
+  return filename;
+}
+
+// ── SPEICHERN ─────────────────────────────────────────────────────────────────
+function buildData(anonym) {
+  // Ursachen
+  const ursachen = [];
+  document.querySelectorAll('#ursachen-list .ursache-row').forEach(row => {
+    const inp = row.querySelector('input');
+    const sel = row.querySelector('select');
+    ursachen.push({ beschreibung: inp?.value||'', wahrscheinlichkeit: sel?.value||'' });
+  });
+
+  // Lösungen
+  const loesungen = [];
+  document.querySelectorAll('#loesungen-list .loesung-card').forEach(card => {
+    const ta   = card.querySelector('textarea');
+    const sels = card.querySelectorAll('select');
+    const inp2 = card.querySelectorAll('input');
+    const aufwandEl = card.querySelector('[data-field="aufwand"]');
+    const erfolgEl  = card.querySelector('[data-field="erfolg"]');
+    loesungen.push({
+      beschreibung:    ta?.value||'',
+      aufwand_sterne:  aufwandEl?.dataset.value||'0',
+      erfolg_sterne:   erfolgEl?.dataset.value||'0',
+      empfehlung:      sels[0]?.value||'',
+      risiken:         inp2[0]?.value||'',
+    });
+  });
+
+  // Maßnahmen
+  const massnahmen = [];
+  document.querySelectorAll('#massnahmen-list .massnahme-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    massnahmen.push({
+      massnahme:   inputs[0]?.value||'',
+      zustaendig:  inputs[1]?.value||'',
+      bis_wann:    inputs[2]?.value||'',
+    });
+  });
+
+  const kern = {
+    typ:            document.getElementById('meta-typ').value,
+    bereich:        document.getElementById('meta-bereich').value,
+    periode:        `${document.getElementById('meta-jahr').value}-${document.getElementById('meta-monat').value}`,
+    status:         document.getElementById('meta-status').value,
+    wissenskategorie: document.getElementById('wk-kategorie').value,
+    problem_titel:  document.getElementById('problem-titel').value,
+    problem_kurz:   document.getElementById('problem-kurz').value,
+    datum_auftreten: document.getElementById('datum-auftreten').value,
+    datum_ziel:     document.getElementById('datum-ziel').value,
+    dringlichkeit:  document.getElementById('dringlichkeit').value,
+    problembeschreibung: {
+      ausfuehrlich:  document.getElementById('prob-beschreibung').value,
+      auswirkung:    document.getElementById('prob-auswirkung').value,
+      fakten:        document.getElementById('prob-fakten').value,
+      bedingungen:   document.getElementById('prob-wann').value,
+      bereits_versucht: document.getElementById('prob-versucht').value,
+    },
+    ursachenanalyse: {
+      hauptursache:     document.getElementById('urs-haupt').value,
+      weitere_ursachen: ursachen,
+      wk_verbindung:    document.getElementById('urs-wk-verbindung').value,
+      datenqualitaet:   document.getElementById('urs-datenqualitaet').value,
+    },
+    loesungsansaetze: loesungen,
+    entscheidung: {
+      status:          entscheidung,
+      begruendung:     document.getElementById('ent-begruendung').value,
+      gewaehlt:        document.getElementById('ent-loesung').value,
+      massnahmen,
+      erfolgskriterien: document.getElementById('ent-kriterien').value,
+      review_datum:    document.getElementById('ent-review').value,
+      verantwortlich:  document.getElementById('ent-verantwortlich').value,
+    },
+    reflexion: {
+      lerneffekt:      document.getElementById('ref-lernen').value,
+      praevention:     document.getElementById('ref-praevention').value,
+      ki_relevanz:     document.getElementById('ref-ki-relevanz').value,
+    }
+  };
+
+  if (anonym) return { schicht: 'KERN_ONLY_ANONYM', daten: kern };
+
+  return {
+    schicht: 'VOLLSTAENDIG',
+    privat: {
+      erstellt_von:      document.getElementById('erstellt-von').value,
+      betroffene_stelle: document.getElementById('betroffene-stelle').value,
+      notizen:           document.getElementById('ref-notizen').value,
+    },
+    kern
+  };
+}
+
+function saveOriginal() {
+  const filename = updateFilename();
+  downloadJSON(buildData(false), filename);
+}
+function saveAnonym() {
+  const filename = updateFilename().replace(/^[A-Z]+_/, 'ANON_');
+  downloadJSON(buildData(true), filename);
+}
+function downloadJSON(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

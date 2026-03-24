@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WISSEN.WERKZEUG – Forschungsberichtsformular</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #ECEEF2;
+    padding: 12px;
+    color: #1a1a1a;
+    min-height: 100vh;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    background: #1A3A5C;
+    color: white;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .toolbar-brand { font-family: Arial, sans-serif; }
+  .toolbar-sub { font-size: 11px; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+  .toolbar h1 { font-size: 16px; font-weight: bold; letter-spacing: 1px; font-family: Arial, sans-serif; }
+
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 14px; border: none; border-radius: 6px;
+    cursor: pointer; font-size: 13px; font-weight: bold;
+    transition: all 0.2s; white-space: nowrap; font-family: Arial, sans-serif;
+  }
+  .btn-save    { background: #1A6B3C; color: white; }
+  .btn-anonym  { background: #C25A00; color: white; }
+  .btn-print   { background: #ffffff33; color: white; border: 1px solid #ffffff55; }
+  .btn:hover   { opacity: 0.85; transform: translateY(-1px); }
+
+  /* ── DATEINAME ── */
+  .filename-preview {
+    background: #1E1E1E; color: #A8D8A8;
+    font-family: monospace; font-size: 12px;
+    padding: 9px 14px; border-radius: 6px; margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+  }
+  .filename-label { color: #888; font-size: 11px; white-space: nowrap; padding-top: 1px; font-family: monospace; }
+  #filename-display { color: #FFD700; word-break: break-all; }
+
+  /* ── META-BAR ── */
+  .meta-bar {
+    background: white; border: 1px solid #ddd;
+    border-radius: 8px; padding: 14px; margin-bottom: 12px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+  }
+  .meta-bar label {
+    font-size: 10px; color: #666; text-transform: uppercase;
+    letter-spacing: 0.5px; display: block; margin-bottom: 4px; font-family: Arial, sans-serif;
+  }
+  .meta-bar select, .meta-bar input {
+    width: 100%; padding: 7px 8px; border: 1px solid #ddd;
+    border-radius: 4px; font-size: 13px; background: #f9f9f9; font-family: Arial, sans-serif;
+  }
+
+  /* ── BERICHT ── */
+  .report {
+    background: white; border: 1px solid #ddd;
+    border-radius: 8px; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+
+  /* KOPF */
+  .report-header {
+    background: linear-gradient(135deg, #1A3A5C 0%, #2E5F8A 100%);
+    padding: 28px 24px 22px;
+    position: relative;
+  }
+  .report-header-top {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .report-type-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+    font-family: Arial, sans-serif; white-space: nowrap;
+  }
+  .privacy-badge {
+    background: #FDEAEA; color: #8B1A1A;
+    font-size: 10px; padding: 3px 10px; border-radius: 10px;
+    border: 1px solid #cc000033; font-family: Arial, sans-serif;
+  }
+
+  .header-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label {
+    font-size: 10px; color: rgba(255,255,255,0.6);
+    text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, sans-serif;
+  }
+  .field-group input,
+  .field-group textarea,
+  .field-group select {
+    padding: 8px 10px; border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 4px; font-size: 13px; font-family: Georgia, serif;
+    background: rgba(255,255,255,0.12); color: white;
+    transition: border-color 0.2s; width: 100%;
+  }
+  .field-group input::placeholder,
+  .field-group textarea::placeholder { color: rgba(255,255,255,0.4); }
+  .field-group input:focus,
+  .field-group textarea:focus,
+  .field-group select:focus {
+    outline: none; border-color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.2);
+  }
+  .field-group select option { background: #1A3A5C; color: white; }
+  .field-group textarea { resize: vertical; min-height: 60px; }
+
+  .header-meta-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* ABSCHNITTE */
+  .report-section {
+    padding: 22px 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .report-section:last-of-type { border-bottom: none; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .section-number {
+    background: #1A3A5C; color: white;
+    font-size: 12px; font-weight: bold; font-family: Arial, sans-serif;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title-input {
+    flex: 1; border: none; border-bottom: 2px solid #1A3A5C;
+    font-size: 16px; font-weight: bold; color: #1A3A5C;
+    padding: 4px 0; background: transparent; font-family: Georgia, serif;
+  }
+  .section-title-input:focus { outline: none; border-bottom-color: #2E75B6; }
+
+  .light-label {
+    font-size: 10px; color: #999; text-transform: uppercase;
+    letter-spacing: 0.5px; display: block; margin-bottom: 5px; font-family: Arial, sans-serif;
+  }
+  .light-input, .light-textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid #e8e8e8;
+    border-radius: 4px; font-size: 13px; font-family: Georgia, serif;
+    background: #fafafa; color: #1a1a1a; transition: border-color 0.2s;
+  }
+  .light-input:focus, .light-textarea:focus {
+    outline: none; border-color: #1A3A5C; background: white;
+  }
+  .light-textarea { resize: vertical; min-height: 80px; }
+
+  /* KEYWORDS */
+  .keywords-wrap {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+  }
+  .keyword-tag {
+    background: #E8F0F8; border: 1px solid #C5D8EC; color: #1A3A5C;
+    font-size: 12px; padding: 3px 10px; border-radius: 12px;
+    display: flex; align-items: center; gap: 5px; font-family: Arial, sans-serif;
+  }
+  .keyword-tag button {
+    background: none; border: none; color: #1A3A5C; cursor: pointer;
+    font-size: 14px; padding: 0; line-height: 1; opacity: 0.5;
+  }
+  .keyword-tag button:hover { opacity: 1; }
+  .keyword-add {
+    display: flex; gap: 6px; margin-top: 8px;
+  }
+  .keyword-add input {
+    flex: 1; padding: 6px 10px; border: 1px dashed #C5D8EC;
+    border-radius: 12px; font-size: 12px; background: #f9f9f9; font-family: Arial, sans-serif;
+  }
+  .keyword-add input:focus { outline: none; border-color: #1A3A5C; background: white; }
+  .keyword-add button {
+    background: #1A3A5C; color: white; border: none; border-radius: 12px;
+    padding: 6px 14px; font-size: 12px; cursor: pointer; font-family: Arial, sans-serif;
+  }
+  .keyword-add button:hover { background: #2E5F8A; }
+
+  /* AUTOREN-LISTE */
+  .author-card {
+    background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 6px;
+    padding: 12px; margin-bottom: 8px;
+  }
+  .author-card-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+  }
+  .author-card-label { font-size: 11px; color: #888; font-family: Arial, sans-serif; font-weight: bold; }
+  .author-card-del {
+    background: none; border: none; color: #ccc;
+    cursor: pointer; font-size: 16px; line-height: 1;
+  }
+  .author-card-del:hover { color: #cc0000; }
+  .author-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .author-card-grid .full { grid-column: 1 / -1; }
+
+  /* QUELLEN-LISTE */
+  .quelle-row {
+    display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px;
+  }
+  .quelle-nr {
+    background: #E8F0F8; color: #1A3A5C; font-size: 11px; font-weight: bold;
+    width: 26px; height: 26px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+    margin-top: 8px; font-family: Arial, sans-serif;
+  }
+  .quelle-input {
+    flex: 1; padding: 7px 10px; border: 1px solid #e8e8e8;
+    border-radius: 4px; font-size: 12px; font-family: Georgia, serif;
+    background: #fafafa; font-style: italic;
+  }
+  .quelle-input:focus { outline: none; border-color: #1A3A5C; background: white; }
+  .quelle-del {
+    background: none; border: none; color: #ccc;
+    cursor: pointer; font-size: 16px; padding: 6px 4px;
+  }
+  .quelle-del:hover { color: #cc0000; }
+
+  .add-btn {
+    background: none; border: 1px dashed #1A3A5C; color: #1A3A5C;
+    padding: 7px 14px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; width: 100%; transition: all 0.2s;
+    font-family: Arial, sans-serif; margin-top: 4px;
+  }
+  .add-btn:hover { background: #E8F0F8; }
+
+  /* STATUSLEISTE */
+  .status-bar {
+    background: #f8f9fa; border: 1px solid #ddd;
+    border-radius: 8px; padding: 12px 16px;
+    margin-bottom: 12px; display: flex; gap: 20px; flex-wrap: wrap;
+    align-items: center; font-family: Arial, sans-serif;
+  }
+  .stat-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+  .stat-value { font-weight: bold; color: #1A3A5C; font-size: 13px; }
+
+  /* ANONYM */
+  .anonym-indicator {
+    display: none; background: #FDF0E6; border: 2px dashed #C25A00;
+    border-radius: 4px; padding: 8px 12px; font-size: 12px;
+    color: #C25A00; text-align: center; margin: 0 24px 0;
+    font-family: Arial, sans-serif;
+  }
+
+  /* FORTSCHRITTSBALKEN */
+  .progress-section {
+    background: #f8f9fa; padding: 12px 16px;
+    border-top: 1px solid #eee; display: flex; gap: 4px; flex-wrap: wrap;
+  }
+  .progress-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #ddd; transition: background 0.3s;
+  }
+  .progress-dot.filled { background: #1A3A5C; }
+
+  /* PRINT */
+  @media print {
+    body { background: white; padding: 0; }
+    .toolbar, .meta-bar, .filename-preview, .status-bar,
+    .add-btn, .keyword-add, .author-card-del, .quelle-del,
+    .keyword-tag button, .progress-section { display: none !important; }
+    .report { border: none; box-shadow: none; border-radius: 0; }
+    input, textarea, select { border: none !important; background: transparent !important; color: #1a1a1a !important; }
+    .report-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .field-group label { color: rgba(255,255,255,0.7) !important; }
+    .privacy-badge { display: none !important; }
+  }
+
+  /* MOBIL */
+  @media (max-width: 640px) {
+    body { padding: 8px; }
+    .toolbar { flex-direction: column; align-items: flex-start; }
+    .btn-group { width: 100%; }
+    .btn { flex: 1; text-align: center; font-size: 12px; padding: 10px 6px; }
+    .meta-bar { grid-template-columns: 1fr 1fr; }
+    .header-grid { grid-template-columns: 1fr; }
+    .header-meta-row { grid-template-columns: 1fr 1fr; }
+    .header-meta-row .field-group:last-child { grid-column: 1 / -1; }
+    .author-card-grid { grid-template-columns: 1fr; }
+    .author-card-grid .full { grid-column: 1; }
+    .status-bar { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-brand">
+    <div class="toolbar-sub">WISSEN.WERKZEUG</div>
+    <h1>FORSCHUNGSBERICHTSFORMULAR</h1>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-print"   onclick="window.print()">🖨️ Drucken</button>
+    <button class="btn btn-save"    onclick="saveOriginal()">💾 Speichern</button>
+    <button class="btn btn-anonym"  onclick="saveAnonym()">🔒 Anonym</button>
+    <div>
+    <label>Wissenskategorie</label>
+    <select id="meta-wk" onchange="updateFilename()">
+      <option value="WK0">– WK wählen –</option>
+      <option value="WK1">WK1 – Berechenbare Logik</option>
+      <option value="WK2">WK2 – Physikalisch-empirisch</option>
+      <option value="WK3">WK3 – Kontextuelles Wissen</option>
+      <option value="WK4">WK4 – Kulturelles Wissen</option>
+      <option value="WK5">WK5 – Zeitabhängiges Wissen</option>
+      <option value="WK6">WK6 – Perspektivisches Wissen</option>
+      <option value="WK7">WK7 – Emotionales Wissen</option>
+      <option value="WK8">WK8 – Metawissen</option>
+    </select>
+  </div>
+</div>
+
+<!-- DATEINAME PREVIEW -->
+<div class="filename-preview">
+  <span class="filename-label">Dateiname:</span>
+  <span id="filename-display">FB_____2026-03_______.ww</span>
+</div>
+
+<!-- META FELDER -->
+<div class="meta-bar">
+  <div>
+    <label>Berichtstyp</label>
+    <select id="meta-typ" onchange="updateFilename()">
+      <option value="FB">FB – Forschungsbericht</option>
+      <option value="ST">ST – Studie</option>
+      <option value="WP">WP – Whitepaper</option>
+      <option value="AB">AB – Abschlussbericht</option>
+      <option value="ZB">ZB – Zwischenbericht</option>
+    </select>
+  </div>
+  <div>
+    <label>Fachbereich</label>
+    <select id="meta-fach" onchange="updateFilename()">
+      <option value="">– wählen –</option>
+      <option value="WI">Wirtschaft</option>
+      <option value="SOZ">Sozialwissenschaften</option>
+      <option value="MED">Medizin / Gesundheit</option>
+      <option value="TECH">Technik / IT</option>
+      <option value="NAT">Naturwissenschaften</option>
+      <option value="GEI">Geisteswissenschaften</option>
+      <option value="RECHT">Rechtswissenschaft</option>
+      <option value="PAED">Pädagogik / Bildung</option>
+      <option value="SONST">Sonstiges</option>
+    </select>
+  </div>
+  <div>
+    <label>Jahr</label>
+    <select id="meta-jahr" onchange="updateFilename()"></select>
+  </div>
+  <div>
+    <label>Monat</label>
+    <select id="meta-monat" onchange="updateFilename()">
+      <option value="01">Januar</option><option value="02">Februar</option>
+      <option value="03">März</option><option value="04">April</option>
+      <option value="05">Mai</option><option value="06">Juni</option>
+      <option value="07">Juli</option><option value="08">August</option>
+      <option value="09">September</option><option value="10">Oktober</option>
+      <option value="11">November</option><option value="12">Dezember</option>
+    </select>
+  </div>
+  <div>
+    <label>Status</label>
+    <select id="meta-status" onchange="updateFilename()">
+      <option value="ENTWURF">Entwurf</option>
+      <option value="REVIEW">In Review</option>
+      <option value="FINAL">Final</option>
+      <option value="VEROEFFENTLICHT">Veröffentlicht</option>
+    </select>
+  </div>
+</div>
+
+<!-- STATUSLEISTE -->
+<div class="status-bar">
+  <div class="stat-item">📄 Abschnitte: <span class="stat-value" id="stat-sections">0</span></div>
+  <div class="stat-item">👤 Autoren: <span class="stat-value" id="stat-authors">0</span></div>
+  <div class="stat-item">🏷️ Keywords: <span class="stat-value" id="stat-keywords">0</span></div>
+  <div class="stat-item">📚 Quellen: <span class="stat-value" id="stat-sources">0</span></div>
+  <div class="stat-item">✍️ Zeichen: <span class="stat-value" id="stat-chars">0</span></div>
+</div>
+
+<!-- BERICHT -->
+<div class="report">
+
+  <!-- KOPF -->
+  <div class="report-header" id="report-header">
+    <div class="report-header-top">
+      <div>
+        <div class="report-type-badge" id="typ-badge">Forschungsbericht</div>
+      </div>
+      <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
+    </div>
+
+    <div class="header-grid">
+      <div class="field-group">
+        <label>Titel des Berichts</label>
+        <input type="text" id="bericht-titel" placeholder="Vollständiger Titel des Forschungsberichts"
+               oninput="updateFilename(); updateStats()" style="font-size:15px; font-weight:bold;">
+        <label style="margin-top:8px;">Untertitel (optional)</label>
+        <input type="text" id="bericht-untertitel" placeholder="Untertitel oder Ergänzung">
+      </div>
+      <div class="field-group">
+        <label>Institution / Herausgeber</label>
+        <input type="text" id="institution" placeholder="Name der Forschungseinrichtung oder Institution">
+        <label style="margin-top:8px;">Auftraggeber (optional)</label>
+        <input type="text" id="auftraggeber" placeholder="Auftraggeber oder Förderinstitution">
+      </div>
+    </div>
+
+    <div class="header-meta-row">
+      <div class="field-group">
+        <label>Berichtsnummer / Kennzeichen</label>
+        <input type="text" id="berichtsnr" placeholder="z.B. IWD-2026-012" oninput="updateFilename()">
+      </div>
+      <div class="field-group">
+        <label>Datum der Fertigstellung</label>
+        <input type="date" id="fertigstellungsdatum">
+      </div>
+      <div class="field-group">
+        <label>Förderkennzeichen (opt.)</label>
+        <input type="text" id="foerderkz" placeholder="z.B. BMBF-01XY2026">
+      </div>
+    </div>
+  </div>
+
+  <!-- ANONYM HINWEIS -->
+  <div class="anonym-indicator" id="anonym-indicator">
+    🔒 ANONYM-MODUS: Institution, Auftraggeber und Autoren werden beim Speichern entfernt
+  </div>
+
+  <!-- ABSCHNITT: AUTOREN -->
+  <div class="report-section" id="section-autoren">
+    <div class="section-header">
+      <div class="section-number">✍</div>
+      <span style="font-size:15px; font-weight:bold; color:#1A3A5C; font-family:Georgia,serif;">Autoren & Kontakt</span>
+    </div>
+    <div id="autoren-list"></div>
+    <button class="add-btn" onclick="addAuthor()">+ Autor / Autorin hinzufügen</button>
+  </div>
+
+  <!-- ABSCHNITT: ZUSAMMENFASSUNG -->
+  <div class="report-section">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <input type="text" class="section-title-input" value="Zusammenfassung / Abstract" oninput="updateStats()">
+    </div>
+    <label class="light-label">Deutsch</label>
+    <textarea class="light-textarea" id="abstract-de" placeholder="Kurze Zusammenfassung des Berichts auf Deutsch (max. 300 Wörter)..." style="min-height:100px;" oninput="updateStats()"></textarea>
+    <div style="margin-top:10px;">
+      <label class="light-label">English Abstract (optional)</label>
+      <textarea class="light-textarea" id="abstract-en" placeholder="Short summary in English..." oninput="updateStats()"></textarea>
+    </div>
+    <div style="margin-top:12px;">
+      <label class="light-label">Keywords / Schlagwörter</label>
+      <div class="keywords-wrap" id="keywords-wrap"></div>
+      <div class="keyword-add">
+        <input type="text" id="keyword-input" placeholder="Stichwort eingeben..."
+               onkeydown="if(event.key==='Enter'){addKeyword();event.preventDefault()}">
+        <button onclick="addKeyword()">+ Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DYNAMISCHE ABSCHNITTE -->
+  <div id="dynamic-sections"></div>
+
+  <div style="padding: 16px 24px;">
+    <button class="add-btn" onclick="addSection()">+ Abschnitt hinzufügen</button>
+  </div>
+
+  <!-- ABSCHNITT: METHODIK (fest) -->
+  <div class="report-section">
+    <div class="section-header">
+      <div class="section-number">◎</div>
+      <span style="font-size:15px; font-weight:bold; color:#1A3A5C; font-family:Georgia,serif;">Methodik</span>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; flex-wrap:wrap;">
+      <div>
+        <label class="light-label">Forschungsansatz</label>
+        <select class="light-input" id="methode-ansatz">
+          <option value="">– bitte wählen –</option>
+          <option>Quantitativ</option>
+          <option>Qualitativ</option>
+          <option>Mixed Methods</option>
+          <option>Literaturanalyse / Review</option>
+          <option>Experimentell</option>
+          <option>Fallstudie</option>
+          <option>Längsschnittstudie</option>
+        </select>
+      </div>
+      <div>
+        <label class="light-label">Stichprobengröße (n)</label>
+        <input type="number" class="light-input" id="methode-n" placeholder="z.B. 1240" min="0">
+      </div>
+      <div>
+        <label class="light-label">Erhebungszeitraum von</label>
+        <input type="date" class="light-input" id="methode-von">
+      </div>
+      <div>
+        <label class="light-label">Erhebungszeitraum bis</label>
+        <input type="date" class="light-input" id="methode-bis">
+      </div>
+      <div style="grid-column: 1 / -1;">
+        <label class="light-label">Methodenbeschreibung</label>
+        <textarea class="light-textarea" id="methode-beschreibung"
+          placeholder="Beschreiben Sie die eingesetzten Methoden, Instrumente und das Vorgehen..." oninput="updateStats()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABSCHNITT: QUELLEN -->
+  <div class="report-section" id="section-quellen">
+    <div class="section-header">
+      <div class="section-number">📚</div>
+      <span style="font-size:15px; font-weight:bold; color:#1A3A5C; font-family:Georgia,serif;">Quellenverzeichnis</span>
+    </div>
+    <div id="quellen-list"></div>
+    <button class="add-btn" onclick="addQuelle()">+ Quelle hinzufügen</button>
+  </div>
+
+  <!-- ABSCHNITT: ANHANG / NOTIZEN -->
+  <div class="report-section">
+    <div class="section-header">
+      <div class="section-number">◈</div>
+      <span style="font-size:15px; font-weight:bold; color:#1A3A5C; font-family:Georgia,serif;">Interne Notizen (nicht im Export)</span>
+    </div>
+    <textarea class="light-textarea" id="interne-notizen"
+      placeholder="Interne Anmerkungen, offene Punkte, ToDos – diese werden im anonymen Export nicht gespeichert..."
+      style="min-height:80px; background:#FFFBF0; border-color:#F0E8C8;"></textarea>
+  </div>
+
+  <!-- FORTSCHRITT -->
+  <div class="progress-section" id="progress-dots"></div>
+
+</div>
+
+<script>
+let authorCount = 0;
+let quellenCount = 0;
+let sectionCount = 0;
+let keywords = [];
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const jahrSelect = document.getElementById('meta-jahr');
+  for (let y = now.getFullYear(); y >= 2018; y--) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    if (y === now.getFullYear()) opt.selected = true;
+    jahrSelect.appendChild(opt);
+  }
+  document.getElementById('meta-monat').value = String(now.getMonth() + 1).padStart(2, '0');
+  document.getElementById('fertigstellungsdatum').value = now.toISOString().split('T')[0];
+  addAuthor();
+  addQuelle();
+  updateFilename();
+  updateStats();
+  renderProgress();
+});
+
+// ── AUTOREN ───────────────────────────────────────────────────────────────────
+function addAuthor() {
+  authorCount++;
+  const id = authorCount;
+  const list = document.getElementById('autoren-list');
+  const div = document.createElement('div');
+  div.className = 'author-card';
+  div.id = `author-${id}`;
+  div.innerHTML = `
+    <div class="author-card-header">
+      <span class="author-card-label">Autor ${id}</span>
+      <button class="author-card-del" onclick="removeAuthor(${id})" title="Entfernen">×</button>
+    </div>
+    <div class="author-card-grid">
+      <div>
+        <label class="light-label">Titel / Grad</label>
+        <input type="text" class="light-input" placeholder="z.B. Dr., Prof. Dr.">
+      </div>
+      <div>
+        <label class="light-label">Name, Vorname</label>
+        <input type="text" class="light-input" placeholder="Mustermann, Max" oninput="updateStats()">
+      </div>
+      <div class="full">
+        <label class="light-label">Institution / Abteilung</label>
+        <input type="text" class="light-input" placeholder="z.B. Institut für Wirtschaftsforschung">
+      </div>
+      <div>
+        <label class="light-label">E-Mail (Kontakt)</label>
+        <input type="email" class="light-input" placeholder="m.mustermann@institut.de">
+      </div>
+      <div>
+        <label class="light-label">ORCID (optional)</label>
+        <input type="text" class="light-input" placeholder="0000-0000-0000-0000">
+      </div>
+    </div>
+  `;
+  list.appendChild(div);
+  updateStats();
+}
+
+function removeAuthor(id) {
+  document.getElementById(`author-${id}`)?.remove();
+  updateStats();
+}
+
+// ── QUELLEN ───────────────────────────────────────────────────────────────────
+function addQuelle() {
+  quellenCount++;
+  const id = quellenCount;
+  const list = document.getElementById('quellen-list');
+  const div = document.createElement('div');
+  div.className = 'quelle-row';
+  div.id = `quelle-${id}`;
+  div.innerHTML = `
+    <div class="quelle-nr">${id}</div>
+    <input type="text" class="quelle-input" placeholder="Autor(en) (Jahr). Titel. Ort: Verlag. DOI/URL..."
+           oninput="updateStats()">
+    <button class="quelle-del" onclick="removeQuelle(${id})" title="Entfernen">×</button>
+  `;
+  list.appendChild(div);
+  updateStats();
+}
+
+function removeQuelle(id) {
+  document.getElementById(`quelle-${id}`)?.remove();
+  updateStats();
+}
+
+// ── KEYWORDS ──────────────────────────────────────────────────────────────────
+function addKeyword() {
+  const input = document.getElementById('keyword-input');
+  const val = input.value.trim();
+  if (!val || keywords.includes(val)) { input.value = ''; return; }
+  keywords.push(val);
+  renderKeywords();
+  input.value = '';
+  updateStats();
+}
+
+function removeKeyword(kw) {
+  keywords = keywords.filter(k => k !== kw);
+  renderKeywords();
+  updateStats();
+}
+
+function renderKeywords() {
+  const wrap = document.getElementById('keywords-wrap');
+  wrap.innerHTML = keywords.map(kw => `
+    <span class="keyword-tag">
+      ${kw}
+      <button onclick="removeKeyword('${kw.replace(/'/g, "\\'")}')">×</button>
+    </span>
+  `).join('');
+}
+
+// ── DYNAMISCHE ABSCHNITTE ─────────────────────────────────────────────────────
+function addSection() {
+  sectionCount++;
+  const id = sectionCount;
+  const container = document.getElementById('dynamic-sections');
+  const div = document.createElement('div');
+  div.className = 'report-section';
+  div.id = `dyn-section-${id}`;
+
+  const num = 2 + (id - 1);
+  div.innerHTML = `
+    <div class="section-header">
+      <div class="section-number">${num}</div>
+      <input type="text" class="section-title-input" placeholder="Abschnittstitel eingeben..."
+             oninput="updateStats()">
+      <button onclick="removeSection(${id})" title="Entfernen"
+        style="background:none;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 0 0 8px;">×</button>
+    </div>
+    <textarea class="light-textarea" style="min-height:120px;"
+      placeholder="Inhalt des Abschnitts..." oninput="updateStats()"></textarea>
+    <div style="margin-top:10px;">
+      <label class="light-label">Unterabschnitt (optional)</label>
+      <input type="text" class="light-input" placeholder="Titel des Unterabschnitts" oninput="updateStats()" style="margin-bottom:6px;">
+      <textarea class="light-textarea" placeholder="Inhalt des Unterabschnitts..." oninput="updateStats()"></textarea>
+    </div>
+  `;
+  container.appendChild(div);
+  updateStats();
+  renderProgress();
+}
+
+function removeSection(id) {
+  document.getElementById(`dyn-section-${id}`)?.remove();
+  updateStats();
+  renderProgress();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const sections = document.querySelectorAll('.report-section').length + sectionCount;
+  const authors  = document.querySelectorAll('.author-card').length;
+  const sources  = document.querySelectorAll('.quelle-row').length;
+
+  let chars = 0;
+  document.querySelectorAll('input[type="text"], input[type="email"], textarea').forEach(el => {
+    chars += (el.value || '').length;
+  });
+
+  document.getElementById('stat-sections').textContent = document.querySelectorAll('#dynamic-sections .report-section').length;
+  document.getElementById('stat-authors').textContent  = authors;
+  document.getElementById('stat-keywords').textContent = keywords.length;
+  document.getElementById('stat-sources').textContent  = sources;
+  document.getElementById('stat-chars').textContent    = chars.toLocaleString('de-DE');
+
+  renderProgress();
+}
+
+// ── FORTSCHRITT ───────────────────────────────────────────────────────────────
+function renderProgress() {
+  const total = 12;
+  let filled = 0;
+  if (document.getElementById('bericht-titel')?.value) filled += 2;
+  if (document.getElementById('institution')?.value)   filled += 1;
+  if (document.getElementById('abstract-de')?.value)   filled += 2;
+  if (keywords.length > 0)                             filled += 1;
+  if (document.querySelectorAll('.author-card').length > 0) filled += 1;
+  if (document.getElementById('methode-ansatz')?.value) filled += 1;
+  if (document.getElementById('methode-beschreibung')?.value) filled += 1;
+  if (document.querySelectorAll('.quelle-row').length > 1) filled += 1;
+  if (document.querySelectorAll('#dynamic-sections .report-section').length > 0) filled += 2;
+  filled = Math.min(filled, total);
+
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'progress-dot' + (i < filled ? ' filled' : '');
+    dots.appendChild(d);
+  }
+}
+
+// ── DATEINAME ─────────────────────────────────────────────────────────────────
+function updateFilename() {
+  const typ   = document.getElementById('meta-typ').value    || 'FB';
+  const fach  = document.getElementById('meta-fach').value   || '____';
+  const jahr  = document.getElementById('meta-jahr').value   || '2026';
+  const monat = document.getElementById('meta-monat').value  || '01';
+  const stat  = document.getElementById('meta-status').value || 'ENTWURF';
+  const titel = (document.getElementById('bericht-titel')?.value || '')
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9\-äöüÄÖÜß]/g, '')
+    .substring(0, 22) || '____';
+
+  const wk = document.getElementById('meta-wk')?.value || 'WK0';
+  const name = `${typ}_${fach}_${jahr}-${monat}_${titel}_${wk}_${stat}.ww`;
+  document.getElementById('filename-display').textContent = name;
+
+  // Typ-Badge aktualisieren
+  const labels = {
+    'FB': 'Forschungsbericht', 'ST': 'Studie',
+    'WP': 'Whitepaper', 'AB': 'Abschlussbericht', 'ZB': 'Zwischenbericht'
+  };
+  const badge = document.getElementById('typ-badge');
+  if (badge) badge.textContent = labels[typ] || typ;
+
+  return name;
+}
+
+// ── SPEICHERN ─────────────────────────────────────────────────────────────────
+function buildData(anonym) {
+  const authors = [];
+  document.querySelectorAll('.author-card').forEach(card => {
+    const inputs = card.querySelectorAll('input');
+    authors.push({
+      titel: inputs[0]?.value || '',
+      name:  inputs[1]?.value || '',
+      institution: inputs[2]?.value || '',
+      email: inputs[3]?.value || '',
+      orcid: inputs[4]?.value || ''
+    });
+  });
+
+  const quellen = [];
+  document.querySelectorAll('.quelle-row input').forEach(inp => {
+    quellen.push(inp.value);
+  });
+
+  const dynSections = [];
+  document.querySelectorAll('#dynamic-sections .report-section').forEach(sec => {
+    const title   = sec.querySelector('.section-title-input')?.value || '';
+    const texts   = sec.querySelectorAll('textarea');
+    const subtitles = sec.querySelectorAll('input.light-input');
+    dynSections.push({
+      titel: title,
+      inhalt: texts[0]?.value || '',
+      unterabschnitt_titel: subtitles[0]?.value || '',
+      unterabschnitt_inhalt: texts[1]?.value || ''
+    });
+  });
+
+  const kern = {
+    typ:          document.getElementById('meta-typ').value,
+    fachbereich:  document.getElementById('meta-fach').value,
+    periode:      `${document.getElementById('meta-jahr').value}-${document.getElementById('meta-monat').value}`,
+    status:       document.getElementById('meta-status').value,
+    titel:        document.getElementById('bericht-titel').value,
+    wissenskategorie: document.getElementById('meta-wk')?.value || 'WK0',
+    untertitel:   document.getElementById('bericht-untertitel').value,
+    berichtsnr:   document.getElementById('berichtsnr').value,
+    abstract_de:  document.getElementById('abstract-de').value,
+    abstract_en:  document.getElementById('abstract-en').value,
+    keywords,
+    methodik: {
+      ansatz:       document.getElementById('methode-ansatz').value,
+      n:            document.getElementById('methode-n').value,
+      zeitraum_von: document.getElementById('methode-von').value,
+      zeitraum_bis: document.getElementById('methode-bis').value,
+      beschreibung: document.getElementById('methode-beschreibung').value
+    },
+    abschnitte: dynSections,
+    quellen
+  };
+
+  if (anonym) return { schicht: 'KERN_ONLY_ANONYM', daten: kern };
+
+  return {
+    schicht: 'VOLLSTAENDIG',
+    privat: {
+      institution:   document.getElementById('institution').value,
+      auftraggeber:  document.getElementById('auftraggeber').value,
+      foerderkz:     document.getElementById('foerderkz').value,
+      fertigstellung: document.getElementById('fertigstellungsdatum').value,
+      autoren: authors,
+      interne_notizen: document.getElementById('interne-notizen').value
+    },
+    kern
+  };
+}
+
+function saveOriginal() {
+  updateStats();
+  const filename = updateFilename();
+  downloadJSON(buildData(false), filename);
+}
+
+function saveAnonym() {
+  updateStats();
+  const filename = updateFilename().replace(/^[A-Z]+_/, 'ANON_');
+  downloadJSON(buildData(true), filename);
+}
+
+function downloadJSON(data, filename) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
