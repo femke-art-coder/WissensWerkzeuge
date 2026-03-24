@@ -622,7 +622,6 @@ let positionCount = 0;
 // Initialisierung
 document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
-  // Jahres-Dropdown
   const jahrSelect = document.getElementById('meta-jahr');
   for (let y = now.getFullYear(); y >= 2020; y--) {
     const opt = document.createElement('option');
@@ -632,51 +631,76 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('meta-monat').value = String(now.getMonth() + 1).padStart(2, '0');
   document.getElementById('rechnungsdatum').value = now.toISOString().split('T')[0];
-  // ANGEBOT-DATEN UEBERNEHMEN
+
+  // ── ANGEBOT-DATEN IMPORTIEREN ──────────────────────────────────────────────
   const angebotRaw = sessionStorage.getItem('ww_angebot_data');
   if (angebotRaw) {
     try {
       const ang = JSON.parse(angebotRaw);
-      const k = ang.kern || {};
-      const p = ang.privat || {};
-      if (k.branche) document.getElementById('meta-branche').value = k.branche;
+      const k   = ang.kern    || {};
+      const p   = ang.privat  || {};
+
+      // Meta-Felder
+      if (k.branche)   document.getElementById('meta-branche').value   = k.branche;
       if (k.kategorie) document.getElementById('meta-kategorie').value = k.kategorie;
       if (k.periode) {
         const parts = k.periode.split('-');
-        if (parts[0]) document.getElementById('meta-jahr').value = parts[0];
+        if (parts[0]) document.getElementById('meta-jahr').value  = parts[0];
         if (parts[1]) document.getElementById('meta-monat').value = parts[1];
       }
+
+      // Private Felder
       if (p.absender_name)      document.getElementById('absender-name').value      = p.absender_name;
       if (p.absender_adresse)   document.getElementById('absender-adresse').value   = p.absender_adresse;
       if (p.empfaenger_name)    document.getElementById('empfaenger-name').value    = p.empfaenger_name;
       if (p.empfaenger_adresse) document.getElementById('empfaenger-adresse').value = p.empfaenger_adresse;
-      if (p.iban)     document.getElementById('iban').value     = p.iban;
-      if (p.steuernr) document.getElementById('steuernr').value = p.steuernr;
-      if (p.kontakt)  document.getElementById('kontakt').value  = p.kontakt;
-      if (k.betreff)  document.getElementById('betreff').value  = k.betreff;
+      if (p.iban)               document.getElementById('iban').value               = p.iban;
+      if (p.steuernr)           document.getElementById('steuernr').value           = p.steuernr;
+      if (p.kontakt)            document.getElementById('kontakt').value            = p.kontakt;
+
+      // Kern-Felder
+      if (k.betreff)             document.getElementById('betreff').value             = k.betreff;
       if (k.zahlungsbedingungen) document.getElementById('zahlungsbedingungen').value = k.zahlungsbedingungen;
-      const rNr = sessionStorage.getItem('ww_vorgeschlagene_rechnungsnr');
-      if (rNr) document.getElementById('rechnungsnr').value = rNr;
+      if (k.lieferdatum)         document.getElementById('leistungsdatum').value      = k.lieferdatum;
       if (k.mwst_satz) {
         const satz = parseInt(k.mwst_satz);
         if ([0,7,19].includes(satz)) document.getElementById('mwst-satz').value = satz;
       }
-      if (k.lieferdatum) document.getElementById('leistungsdatum').value = k.lieferdatum;
+
+      // Rechnungsnummer vorschlagen
+      const rNr = sessionStorage.getItem('ww_vorgeschlagene_rechnungsnr');
+      if (rNr) document.getElementById('rechnungsnr').value = rNr;
+
+      // Positionen uebernehmen — addPosition(data) fuellt Desktop+Mobil korrekt
       if (k.positionen && k.positionen.length > 0) {
         k.positionen.forEach(function(pos) { addPosition(pos); });
-      } else { addPosition(); }
+      } else {
+        addPosition();
+      }
+
+      // Summen neu berechnen
+      recalc();
+
+      // Gruener Erfolgs-Banner
       const banner = document.createElement('div');
       banner.style.cssText = 'background:#E8F5EE;border:2px solid #1A6B3C;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#1A6B3C;font-family:Arial,sans-serif;';
-      banner.innerHTML = '&#x2705; <strong>Angebotsdaten übernommen.</strong> Bitte Rechnungsnummer und Datum prüfen.';
+      banner.innerHTML = '<strong>&#x2705; Angebotsdaten übernommen.</strong> Bitte Rechnungsnummer und Datum prüfen.';
       document.querySelector('.invoice').insertAdjacentElement('beforebegin', banner);
-      setTimeout(function(){ banner.remove(); }, 8000);
+      setTimeout(function() { banner.remove(); }, 8000);
+
+      // sessionStorage leeren
       sessionStorage.removeItem('ww_angebot_data');
       sessionStorage.removeItem('ww_angebot_filename');
       sessionStorage.removeItem('ww_vorgeschlagene_rechnungsnr');
-    } catch(e) { console.error('Import fehlgeschlagen:', e); addPosition(); }
+
+    } catch(e) {
+      console.error('Angebot-Import fehlgeschlagen:', e);
+      addPosition();
+    }
   } else {
     addPosition();
   }
+
   updateFilename();
 });
 
@@ -684,9 +708,18 @@ function isMobile() {
   return window.innerWidth <= 640;
 }
 
-function addPosition() {
+function addPosition(data) {
   positionCount++;
   const id = positionCount;
+
+  // Desktop-Zeile
+  // Werte aus data-Objekt oder Defaults
+  const _desc   = data?.beschreibung  || '';
+  const _menge  = data?.menge         || '1';
+  const _einh   = data?.einheit       || 'Std.';
+  const _einzel = data?.einzelpreis   || '0';
+  const _ges    = data?.gesamt        || '0';
+  const _gesFmt = parseFloat(_ges).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
 
   // Desktop-Zeile
   const tbody = document.getElementById('positions-body');
@@ -694,25 +727,22 @@ function addPosition() {
   tr.id = `pos-${id}`;
   tr.innerHTML = `
     <td class="pos-nr">${id}</td>
-    <td class="pos-desc"><input type="text" placeholder="Leistung beschreiben..." oninput="updateFilename()"></td>
-    <td class="pos-menge"><input type="number" value="1" min="0" step="0.01" oninput="recalcDesktopRow(this); recalc()"></td>
-    <td class="pos-menge"><input type="text" value="Std." placeholder="Stk/Std."></td>
-    <td class="pos-einzel"><input type="number" value="0" min="0" step="0.01" oninput="recalcDesktopRow(this); recalc()"></td>
-    <td class="pos-gesamt"><input type="number" value="0" readonly style="font-weight:bold; color:#1A3A5C;"></td>
+    <td class="pos-desc"><input type="text" value="${_desc.replace(/"/g,'&quot;')}" placeholder="Leistung beschreiben..." oninput="updateFilename()"></td>
+    <td class="pos-menge"><input type="number" value="${_menge}" min="0" step="0.01" oninput="recalcDesktopRow(this); recalc()"></td>
+    <td class="pos-menge"><input type="text" value="${_einh}" placeholder="Stk/Std."></td>
+    <td class="pos-einzel"><input type="number" value="${_einzel}" min="0" step="0.01" oninput="recalcDesktopRow(this); recalc()"></td>
+    <td class="pos-gesamt"><input type="number" value="${_ges}" readonly style="font-weight:bold; color:#1A3A5C;"></td>
     <td class="pos-del"><button onclick="removePosition(${id})" title="Entfernen">×</button></td>
   `;
   tbody.appendChild(tr);
+  // Gesamt neu berechnen falls Werte vorhanden
+  if (data) recalcDesktopRow(tr.querySelectorAll('input[type="number"]')[1]);
 
-  // Mobile-Karte
+  // Mobile-Karte mit data-field Attributen
   const mobileDiv = document.getElementById('mobile-positions');
   const card = document.createElement('div');
   card.className = 'pos-card';
   card.id = `mpos-${id}`;
-  const _desc = data&&data.beschreibung?data.beschreibung:'';
-  const _menge = data&&data.menge?data.menge:1;
-  const _einheit = data&&data.einheit?data.einheit:'Std.';
-  const _einzel = data&&data.einzelpreis?data.einzelpreis:0;
-  const _gesamt = data&&data.gesamt?parseFloat(data.gesamt):0;
   card.innerHTML = `
     <div class="pos-card-header">
       <span class="pos-card-nr">Position ${id}</span>
@@ -721,27 +751,27 @@ function addPosition() {
     <div class="pos-card-grid">
       <div class="full">
         <label>Beschreibung</label>
-        <input type="text" value="${_desc}" placeholder="Leistung beschreiben..."
+        <input type="text" data-field="beschreibung" value="${_desc.replace(/"/g,'&quot;')}" placeholder="Leistung beschreiben..."
                oninput="syncFromMobile(${id}); updateFilename()">
       </div>
       <div>
         <label>Menge</label>
-        <input type="number" value="${_menge}" min="0" step="0.01"
+        <input type="number" data-field="menge" value="${_menge}" min="0" step="0.01"
                oninput="syncFromMobile(${id}); recalc()">
       </div>
       <div>
         <label>Einheit</label>
-        <input type="text" value="${_einheit}" placeholder="Stk/Std."
+        <input type="text" data-field="einheit" value="${_einh}" placeholder="Stk/Std."
                oninput="syncFromMobile(${id})">
       </div>
       <div>
         <label>Einzelpreis (€)</label>
-        <input type="number" value="${_einzel}" min="0" step="0.01"
+        <input type="number" data-field="einzelpreis" value="${_einzel}" min="0" step="0.01"
                oninput="syncFromMobile(${id}); recalc()">
       </div>
       <div>
         <label>Gesamt</label>
-        <div class="gesamt-display" id="mpos-gesamt-${id}">${_gesamt.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} €</div>
+        <div class="gesamt-display" id="mpos-gesamt-${id}">${_gesFmt}</div>
       </div>
     </div>
   `;
@@ -762,16 +792,15 @@ function syncFromMobile(id) {
   const card = document.getElementById(`mpos-${id}`);
   const row  = document.getElementById(`pos-${id}`);
   if (!card || !row) return;
-  const ci = card.querySelectorAll('input');
+  // Robuste Suche per data-field statt Index
+  const get = (field) => card.querySelector(`[data-field="${field}"]`)?.value || '';
   const ri = row.querySelectorAll('input');
-  ri[0].value = ci[0].value; // beschreibung
-  ri[1].value = ci[1].value; // menge
-  ri[2].value = ci[2].value; // einheit
-  ri[3].value = ci[3].value; // einzelpreis
-  recalcDesktopRow(ri[3]);
-  // Gesamt in Karte aktualisieren
-  const menge  = parseFloat(ci[1].value) || 0;
-  const einzel = parseFloat(ci[3].value) || 0;
+  ri[0].value = get('beschreibung');
+  ri[1].value = get('menge');
+  ri[2].value = get('einheit');
+  ri[3].value = get('einzelpreis');
+  const menge  = parseFloat(get('menge'))  || 0;
+  const einzel = parseFloat(get('einzelpreis')) || 0;
   const gesamt = menge * einzel;
   ri[4].value = gesamt.toFixed(2);
   const gesamtEl = document.getElementById(`mpos-gesamt-${id}`);
