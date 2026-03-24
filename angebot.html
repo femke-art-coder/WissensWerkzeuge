@@ -6,352 +6,273 @@
 <title>WISSEN.WERKZEUG – Angebotsformular</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   body {
     font-family: Arial, sans-serif;
     background: #f0f4f8;
-    padding: 20px;
+    padding: 12px;
     color: #1a1a1a;
   }
 
+  /* ── TOOLBAR ── */
   .toolbar {
     background: #1A6B3C;
     color: white;
-    padding: 16px 24px;
+    padding: 14px 16px;
     border-radius: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .toolbar h1 { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
-  .toolbar-sub { font-size: 12px; opacity: 0.7; margin-top: 2px; }
-
-  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
-
-  .btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    transition: all 0.2s;
-  }
-
-  .btn-original { background: #1A3A5C; color: white; }
-  .btn-anonym { background: #C25A00; color: white; }
-  .btn-print { background: #ffffff33; color: white; border: 1px solid #ffffff55; }
-  .btn-zu-rechnung { background: #FFD700; color: #1a1a1a; }
-  .btn:hover { opacity: 0.85; transform: translateY(-1px); }
-
-  .filename-preview {
-    background: #1E1E1E;
-    color: #A8D8A8;
-    font-family: monospace;
-    font-size: 13px;
-    padding: 10px 16px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
     gap: 10px;
   }
+  .toolbar h1 { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+  .toolbar-sub { font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
 
-  .filename-label { color: #888; white-space: nowrap; font-size: 11px; }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 14px; border: none; border-radius: 6px;
+    cursor: pointer; font-size: 13px; font-weight: bold;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-original    { background: #1A3A5C; color: white; }
+  .btn-anonym      { background: #C25A00; color: white; }
+  .btn-print       { background: #ffffff33; color: white; border: 1px solid #ffffff55; }
+  .btn-zu-rechnung { background: #FFD700; color: #1a1a1a; font-weight: bold; }
+  .btn:hover       { opacity: 0.85; transform: translateY(-1px); }
+
+  /* ── DATEINAME ── */
+  .filename-preview {
+    background: #1E1E1E; color: #A8D8A8;
+    font-family: monospace; font-size: 12px;
+    padding: 9px 14px; border-radius: 6px; margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+  }
+  .filename-label { color: #888; font-size: 11px; white-space: nowrap; padding-top: 1px; }
   #filename-display { color: #FFD700; word-break: break-all; }
 
+  /* ── VERBINDUNGSHINWEIS ── */
+  .link-indicator {
+    display: none;
+    background: #fff9e6; border: 2px solid #FFD700;
+    border-radius: 6px; padding: 10px 14px; margin-bottom: 12px;
+    font-size: 12px; color: #856404; align-items: center; gap: 8px;
+  }
+
+  /* ── META-BAR ── */
   .meta-bar {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
+    background: white; border: 1px solid #ddd;
+    border-radius: 8px; padding: 14px; margin-bottom: 12px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
   }
-
   .meta-bar label {
-    font-size: 11px;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: block;
-    margin-bottom: 4px;
+    font-size: 10px; color: #666; text-transform: uppercase;
+    letter-spacing: 0.5px; display: block; margin-bottom: 4px;
   }
-
   .meta-bar select, .meta-bar input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 13px;
-    background: #f9f9f9;
+    width: 100%; padding: 7px 8px; border: 1px solid #ddd;
+    border-radius: 4px; font-size: 13px; background: #f9f9f9;
   }
 
-  /* STATUS BADGE */
-  .status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
-    margin-left: 8px;
-  }
-
-  .status-offen { background: #FFF3CD; color: #856404; }
-  .status-angenommen { background: #D1E7DD; color: #0A3622; }
-  .status-abgelehnt { background: #F8D7DA; color: #58151C; }
-
+  /* ── FORMULAR ── */
   .invoice {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
+    background: white; border: 1px solid #ddd;
+    border-radius: 8px; overflow: hidden;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
+  /* KOPF */
   .invoice-header {
-    background: #f8f9fa;
-    border-bottom: 3px solid #1A6B3C;
-    padding: 24px;
-    position: relative;
+    background: #f8f9fa; border-bottom: 3px solid #1A6B3C;
+    padding: 18px 16px; position: relative;
   }
-
   .privacy-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: #FDEAEA;
-    color: #8B1A1A;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    border: 1px solid #cc000033;
+    position: absolute; top: 8px; right: 8px;
+    background: #FDEAEA; color: #8B1A1A; font-size: 10px;
+    padding: 2px 8px; border-radius: 10px; border: 1px solid #cc000033;
   }
+  .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-  .field-group { display: flex; flex-direction: column; gap: 8px; }
-
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
   .field-group label {
-    font-size: 11px;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 10px; color: #888;
+    text-transform: uppercase; letter-spacing: 0.5px;
   }
-
-  .field-group input, .field-group textarea, .field-group select {
-    padding: 8px 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    font-size: 13px;
-    font-family: Arial, sans-serif;
-    background: white;
-    transition: border-color 0.2s;
+  .field-group input,
+  .field-group textarea,
+  .field-group select {
+    padding: 8px 10px; border: 1px solid #e0e0e0;
+    border-radius: 4px; font-size: 13px;
+    font-family: Arial, sans-serif; background: white;
+    transition: border-color 0.2s; width: 100%;
   }
-
-  .field-group input:focus, .field-group textarea:focus, .field-group select:focus {
-    outline: none;
-    border-color: #1A6B3C;
-  }
-
-  .field-group textarea { resize: vertical; min-height: 60px; }
+  .field-group input:focus,
+  .field-group textarea:focus,
+  .field-group select:focus { outline: none; border-color: #1A6B3C; }
+  .field-group textarea { resize: vertical; min-height: 56px; }
 
   .invoice-number-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 12px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #eee;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid #eee;
   }
 
-  .invoice-body { padding: 24px; border-bottom: 2px solid #eee; }
+  /* BODY */
+  .invoice-body { padding: 18px 16px; border-bottom: 2px solid #eee; }
 
   .section-label {
-    font-size: 11px;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 10px; color: #888; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
   }
-
   .section-label::after { content: ""; flex: 1; height: 1px; background: #eee; }
 
-  .positions-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-
+  /* POSITIONEN – Desktop */
+  .positions-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
   .positions-table th {
-    background: #1A6B3C;
-    color: white;
-    padding: 8px 10px;
-    font-size: 12px;
-    text-align: left;
+    background: #1A6B3C; color: white;
+    padding: 8px 8px; font-size: 11px; text-align: left;
   }
-
-  .positions-table th:last-child,
-  .positions-table th:nth-last-child(2),
-  .positions-table th:nth-last-child(3) { text-align: right; }
-
+  .positions-table th.right { text-align: right; }
   .positions-table td {
-    padding: 6px 10px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
+    padding: 5px 8px; border-bottom: 1px solid #f0f0f0;
+    font-size: 13px; vertical-align: middle;
   }
-
   .positions-table tr:nth-child(even) td { background: #f4faf6; }
-
   .positions-table input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-size: 13px;
-    font-family: Arial, sans-serif;
-    padding: 2px 0;
+    width: 100%; border: none; background: transparent;
+    font-size: 13px; font-family: Arial, sans-serif; padding: 2px 0;
   }
-
   .positions-table input:focus {
-    outline: none;
-    background: #fff9e6;
-    border-radius: 3px;
-    padding: 2px 4px;
+    outline: none; background: #fff9e6;
+    border-radius: 3px; padding: 2px 4px;
   }
-
-  .pos-nr { width: 40px; text-align: center; color: #888; font-size: 12px; }
+  .pos-nr    { width: 34px; text-align: center; color: #888; font-size: 11px; }
+  .pos-menge { width: 64px; }
+  .pos-einzel { width: 90px; }
+  .pos-gesamt { width: 90px; font-weight: bold; }
+  .pos-del   { width: 28px; text-align: center; }
   .pos-menge input, .pos-einzel input, .pos-gesamt input { text-align: right; }
-  .pos-einzel { width: 100px; }
-  .pos-gesamt { width: 100px; font-weight: bold; }
-  .pos-del { width: 30px; text-align: center; }
-  .pos-del button { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; padding: 0; transition: color 0.2s; }
+  .pos-del button {
+    background: none; border: none; color: #ccc;
+    cursor: pointer; font-size: 16px; padding: 0; transition: color 0.2s;
+  }
   .pos-del button:hover { color: #cc0000; }
 
-  .add-pos-btn {
-    background: none;
-    border: 1px dashed #1A6B3C;
-    color: #1A6B3C;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    width: 100%;
-    transition: all 0.2s;
-    margin-bottom: 16px;
-  }
+  /* POSITIONEN – Mobil als Karten */
+  .pos-card { display: none; }
 
+  .add-pos-btn {
+    background: none; border: 1px dashed #1A6B3C; color: #1A6B3C;
+    padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    font-size: 13px; width: 100%; transition: all 0.2s; margin-bottom: 14px;
+  }
   .add-pos-btn:hover { background: #E8F5EE; }
 
+  /* SUMMEN */
   .totals { display: flex; justify-content: flex-end; }
-  .totals-box { width: 280px; }
-
+  .totals-box { width: 260px; }
   .totals-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    font-size: 13px;
-    border-bottom: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between;
+    padding: 5px 0; font-size: 13px; border-bottom: 1px solid #f0f0f0;
   }
-
   .totals-row.total {
-    font-weight: bold;
-    font-size: 15px;
-    border-top: 2px solid #1A6B3C;
-    border-bottom: none;
-    padding-top: 10px;
-    margin-top: 4px;
-    color: #1A6B3C;
+    font-weight: bold; font-size: 15px;
+    border-top: 2px solid #1A6B3C; border-bottom: none;
+    padding-top: 8px; margin-top: 4px; color: #1A6B3C;
   }
-
   .totals-row select {
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    padding: 2px 4px;
-    font-size: 12px;
-    background: #f9f9f9;
+    border: 1px solid #ddd; border-radius: 3px;
+    padding: 2px 4px; font-size: 12px; background: #f9f9f9;
   }
 
-  /* ANGEBOT SPEZIFISCH */
+  /* ANGEBOT-SPEZIFISCH */
   .angebot-hinweis {
-    background: #E8F5EE;
-    border: 1px solid #1A6B3C33;
-    border-radius: 6px;
-    padding: 12px 16px;
-    margin-top: 16px;
-    font-size: 13px;
-    color: #1A6B3C;
+    background: #E8F5EE; border: 1px solid #1A6B3C33;
+    border-radius: 6px; padding: 12px 16px; margin-top: 14px;
+    font-size: 13px; color: #1A6B3C;
   }
-
   .verbindung-box {
-    background: #f9fbff;
-    border: 1px dashed #1A3A5C;
-    border-radius: 6px;
-    padding: 12px 16px;
-    margin-top: 16px;
-    font-size: 13px;
-    color: #1A3A5C;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    background: #fff9e6; border: 1px dashed #FFD700;
+    border-radius: 6px; padding: 12px 16px; margin-top: 12px;
+    font-size: 13px; color: #856404;
+    display: flex; align-items: center; gap: 10px;
   }
 
+  /* FUSSZEILE */
   .invoice-footer {
-    background: #f8f9fa;
-    padding: 20px 24px;
-    border-top: 2px solid #eee;
-    position: relative;
+    background: #f8f9fa; padding: 16px;
+    border-top: 2px solid #eee; position: relative;
   }
-
-  .footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-
+  .footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
   .footer-field label {
-    font-size: 11px;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: block;
-    margin-bottom: 4px;
+    font-size: 10px; color: #888; text-transform: uppercase;
+    letter-spacing: 0.5px; display: block; margin-bottom: 4px;
   }
-
   .footer-field input {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    font-size: 12px;
-    background: white;
+    width: 100%; padding: 6px 8px; border: 1px solid #e0e0e0;
+    border-radius: 4px; font-size: 12px; background: white;
   }
-
   .footer-field input:focus { outline: none; border-color: #1A6B3C; }
 
-  /* VERBINDUNGS-INDIKATOR */
-  .link-indicator {
-    background: #fff9e6;
-    border: 1px solid #FFD700;
-    border-radius: 6px;
-    padding: 8px 16px;
-    margin-bottom: 20px;
-    font-size: 12px;
-    color: #856404;
-    display: none;
-    align-items: center;
-    gap: 8px;
-  }
-
+  /* PRINT */
   @media print {
     body { background: white; padding: 0; }
     .toolbar, .meta-bar, .filename-preview, .add-pos-btn, .pos-del,
-    .link-indicator, .verbindung-box { display: none !important; }
+    .link-indicator, .verbindung-box, .privacy-badge { display: none !important; }
     .invoice { border: none; box-shadow: none; border-radius: 0; }
     input, textarea, select { border: none !important; background: transparent !important; }
     .positions-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .invoice-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .privacy-badge { display: none; }
+  }
+
+  /* ── MOBIL ── */
+  @media (max-width: 640px) {
+    body { padding: 8px; }
+    .toolbar { flex-direction: column; align-items: flex-start; }
+    .btn-group { width: 100%; }
+    .btn { flex: 1; text-align: center; font-size: 11px; padding: 9px 4px; }
+    .meta-bar { grid-template-columns: 1fr 1fr; }
+    .header-grid { grid-template-columns: 1fr; gap: 12px; }
+    .invoice-number-row { grid-template-columns: 1fr 1fr; }
+    .invoice-number-row .field-group:nth-child(3),
+    .invoice-number-row .field-group:nth-child(4) { grid-column: auto; }
+
+    /* Tabelle ausblenden, Karten einblenden */
+    .positions-table { display: none; }
+    .pos-card {
+      display: block; border: 1px solid #e0e0e0;
+      border-radius: 6px; padding: 12px; margin-bottom: 10px; background: #f4faf6;
+    }
+    .pos-card-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 10px;
+    }
+    .pos-card-nr { font-size: 11px; color: #888; font-weight: bold; }
+    .pos-card-del {
+      background: none; border: none; color: #ccc;
+      cursor: pointer; font-size: 18px; padding: 0; line-height: 1;
+    }
+    .pos-card-del:hover { color: #cc0000; }
+    .pos-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .pos-card-grid .full { grid-column: 1 / -1; }
+    .pos-card label {
+      font-size: 10px; color: #888; text-transform: uppercase;
+      letter-spacing: 0.4px; display: block; margin-bottom: 3px;
+    }
+    .pos-card input {
+      width: 100%; padding: 7px 8px; border: 1px solid #e0e0e0;
+      border-radius: 4px; font-size: 13px; font-family: Arial, sans-serif; background: white;
+    }
+    .pos-card input:focus { outline: none; border-color: #1A6B3C; }
+    .pos-card .gesamt-display {
+      font-weight: bold; color: #1A6B3C; padding: 7px 8px;
+      background: #E8F5EE; border-radius: 4px; font-size: 13px;
+    }
+
+    .totals { justify-content: stretch; }
+    .totals-box { width: 100%; }
+    .footer-grid { grid-template-columns: 1fr; gap: 10px; }
   }
 </style>
 </head>
@@ -364,45 +285,48 @@
     <h1>ANGEBOTSFORMULAR</h1>
   </div>
   <div class="btn-group">
-    <button class="btn btn-print" onclick="window.print()">🖨️ Drucken</button>
-    <button class="btn btn-original" onclick="saveOriginal()">💾 Speichern (Original)</button>
-    <button class="btn btn-anonym" onclick="saveAnonym()">🔒 Speichern (Anonym)</button>
-    <button class="btn btn-zu-rechnung" onclick="zuRechnung()">→ Als Rechnung übernehmen</button>
+    <button class="btn btn-print"        onclick="window.print()">🖨️ Drucken</button>
+    <button class="btn btn-original"     onclick="saveOriginal()">💾 Speichern</button>
+    <button class="btn btn-anonym"       onclick="saveAnonym()">🔒 Anonym</button>
+    <button class="btn btn-zu-rechnung"  onclick="zuRechnung()">⚡ → Rechnung</button>
   </div>
 </div>
 
-<!-- VERBINDUNGS-INDIKATOR -->
+<!-- VERBINDUNGSHINWEIS -->
 <div class="link-indicator" id="link-indicator">
-  🔗 Dieses Angebot ist verknüpft mit Rechnung: <strong id="linked-invoice"></strong>
+  🔗 Verknüpft mit Rechnung: <strong id="linked-invoice"></strong>
 </div>
 
-<!-- DATEINAME PREVIEW -->
+<!-- DATEINAME -->
 <div class="filename-preview">
   <span class="filename-label">Dateiname:</span>
-  <span id="filename-display">ANG_____2026-03_____EUR_BE.ww</span>
+  <span id="filename-display">ANG_____2026-03_____EUR_OFFEN_BE.ww</span>
 </div>
 
-<!-- META FELDER -->
+<!-- META -->
 <div class="meta-bar">
   <div>
     <label>Typ</label>
-    <select id="meta-typ" onchange="updateFilename()" disabled style="opacity:0.7">
+    <select id="meta-typ" onchange="updateFilename()">
       <option value="ANG">ANG – Angebot</option>
+      <option value="KOV">KOV – Kostenvoranschlag</option>
+      <option value="PRO">PRO – Proforma</option>
     </select>
   </div>
   <div>
     <label>Branche</label>
     <select id="meta-branche" onchange="updateFilename()">
       <option value="">– wählen –</option>
-      <option value="HAND">Handwerk</option>
-      <option value="TECH">Technik / IT</option>
-      <option value="KREA">Kreativ / Kunst</option>
       <option value="BERA">Beratung</option>
       <option value="BILD">Bildung</option>
-      <option value="MED">Medizin / Gesundheit</option>
       <option value="BAU">Bau / Sanierung</option>
+      <option value="DIENST">Dienstleistungen</option>
       <option value="GAST">Gastronomie</option>
-      <option value="HAND2">Handel</option>
+      <option value="HAND">Handwerk</option>
+      <option value="HANDEL">Handel</option>
+      <option value="KREA">Kreativ / Kunst</option>
+      <option value="MED">Medizin / Gesundheit</option>
+      <option value="TECH">Technik / IT</option>
       <option value="SONST">Sonstiges</option>
     </select>
   </div>
@@ -423,7 +347,7 @@
   </div>
   <div>
     <label>Status</label>
-    <select id="meta-status" onchange="updateFilename(); updateStatus()">
+    <select id="meta-status" onchange="updateFilename()">
       <option value="OFFEN">Offen</option>
       <option value="ANGENOM">Angenommen</option>
       <option value="ABGEL">Abgelehnt</option>
@@ -439,16 +363,12 @@
   </div>
 </div>
 
-<!-- ANGEBOT -->
+<!-- FORMULAR -->
 <div class="invoice">
 
-  <!-- KOPF SCHICHT 1 PRIVAT -->
+  <!-- KOPF -->
   <div class="invoice-header" id="invoice-header">
     <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
-    <div style="display:flex; align-items:center; margin-bottom:16px;">
-      <span style="font-size:22px; font-weight:bold; color:#1A6B3C;">ANGEBOT</span>
-      <span class="status-badge status-offen" id="status-badge">● Offen</span>
-    </div>
     <div class="header-grid">
       <div class="field-group">
         <label>Absender – Name / Firma</label>
@@ -466,7 +386,7 @@
     <div class="invoice-number-row">
       <div class="field-group">
         <label>Angebotsnummer</label>
-        <input type="text" id="angebotsnr" placeholder="z.B. ANG-2026-001">
+        <input type="text" id="angebotsnr" placeholder="z.B. ANG-2026-001" oninput="updateFilename()">
       </div>
       <div class="field-group">
         <label>Angebotsdatum</label>
@@ -477,50 +397,50 @@
         <input type="date" id="gueltig-bis">
       </div>
       <div class="field-group">
-        <label>Gewünschter Start</label>
-        <input type="date" id="wunsch-start">
+        <label>Lieferdatum (geplant)</label>
+        <input type="date" id="lieferdatum">
       </div>
     </div>
   </div>
 
-  <!-- MITTELTEIL SCHICHT 2 KERN -->
+  <!-- BODY -->
   <div class="invoice-body">
     <div class="section-label">Leistungsbeschreibung</div>
 
-    <div class="field-group" style="margin-bottom:16px;">
-      <label>Betreff / Kurzbeschreibung der Leistung</label>
-      <input type="text" id="betreff" placeholder="z.B. Webdesign Projekt, Renovierung Badezimmer, Beratungspaket..." oninput="updateFilename()" style="font-size:14px; padding:10px;">
-    </div>
-
-    <div class="field-group" style="margin-bottom:16px;">
-      <label>Leistungsumfang / Details</label>
-      <textarea id="leistungsumfang" placeholder="Beschreibe was genau im Angebot enthalten ist..." style="min-height:80px;"></textarea>
+    <div class="field-group" style="margin-bottom:14px;">
+      <label>Betreff / Kurzbeschreibung</label>
+      <input type="text" id="betreff" placeholder="z.B. Webdesign Projekt, Beratungspaket, Reparaturarbeiten..."
+             oninput="updateFilename()" style="font-size:14px; padding:10px;">
     </div>
 
     <div class="section-label">Positionen</div>
 
+    <!-- Desktop-Tabelle -->
     <table class="positions-table" id="positions-table">
       <thead>
         <tr>
           <th class="pos-nr">Nr.</th>
-          <th class="pos-desc">Beschreibung</th>
-          <th class="pos-menge" style="text-align:right">Menge</th>
-          <th class="pos-menge" style="text-align:right">Einheit</th>
-          <th class="pos-einzel" style="text-align:right">Einzelpreis</th>
-          <th class="pos-gesamt" style="text-align:right">Gesamt</th>
+          <th>Beschreibung</th>
+          <th class="pos-menge right">Menge</th>
+          <th class="pos-menge right">Einheit</th>
+          <th class="pos-einzel right">Einzelpreis</th>
+          <th class="pos-gesamt right">Gesamt</th>
           <th class="pos-del"></th>
         </tr>
       </thead>
       <tbody id="positions-body"></tbody>
     </table>
 
+    <!-- Mobile Karten -->
+    <div id="mobile-positions"></div>
+
     <button class="add-pos-btn" onclick="addPosition()">+ Position hinzufügen</button>
 
+    <!-- SUMMEN -->
     <div class="totals">
       <div class="totals-box">
         <div class="totals-row">
-          <span>Nettobetrag</span>
-          <span id="netto">0,00 €</span>
+          <span>Nettobetrag</span><span id="netto">0,00 €</span>
         </div>
         <div class="totals-row">
           <span>MwSt <select id="mwst-satz" onchange="recalc()">
@@ -531,30 +451,30 @@
           <span id="mwst-betrag">0,00 €</span>
         </div>
         <div class="totals-row total">
-          <span>Angebotssumme</span>
-          <span id="gesamt-display">0,00 €</span>
+          <span>Angebotssumme</span><span id="gesamt-display">0,00 €</span>
         </div>
       </div>
     </div>
 
-    <div class="field-group" style="margin-top:20px;">
-      <label>Zahlungsbedingungen / Hinweise</label>
-      <input type="text" id="zahlungsbedingungen" placeholder="z.B. 50% Anzahlung bei Auftragserteilung, Rest nach Abschluss">
+    <div class="field-group" style="margin-top:16px;">
+      <label>Zahlungsbedingungen / Konditionen</label>
+      <input type="text" id="zahlungsbedingungen"
+             placeholder="z.B. 50% Anzahlung, Rest nach Abschluss – zahlbar innerhalb 14 Tagen">
     </div>
 
+    <!-- ANGEBOT HINWEIS -->
     <div class="angebot-hinweis">
-      📋 Dieses Angebot ist freibleibend und gilt bis zum angegebenen Datum. Bei Auftragserteilung wird automatisch eine Rechnung mit denselben Daten erstellt.
+      📋 Dieses Angebot ist freibleibend und gilt bis zum angegebenen Datum.
+      Bei Auftragserteilung kann es mit einem Klick als Rechnung übernommen werden.
     </div>
 
-    <!-- VERBINDUNG ZUR RECHNUNG -->
-    <div class="verbindung-box" id="verbindung-box" style="display:none">
+    <!-- VERBINDUNGSBOX (nach Übergabe sichtbar) -->
+    <div class="verbindung-box" id="verbindung-box" style="display:none;">
       🔗 Verknüpfte Rechnung: <strong id="verbindung-nr"></strong>
-      <span id="verbindung-filename" style="font-family:monospace; font-size:11px; color:#888;"></span>
     </div>
-
   </div>
 
-  <!-- FUSSZEILE SCHICHT 1 PRIVAT -->
+  <!-- FUSSZEILE -->
   <div class="invoice-footer" id="invoice-footer">
     <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
     <div class="footer-grid">
@@ -573,14 +493,14 @@
     </div>
   </div>
 
-</div>
+</div><!-- /.invoice -->
 
 <script>
 let positionCount = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
-  const jahrSelect = document.getElementById('meta-jahr');
   const now = new Date();
+  const jahrSelect = document.getElementById('meta-jahr');
   for (let y = now.getFullYear(); y >= 2020; y--) {
     const opt = document.createElement('option');
     opt.value = y; opt.textContent = y;
@@ -589,45 +509,125 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('meta-monat').value = String(now.getMonth() + 1).padStart(2, '0');
   document.getElementById('angebotsdatum').value = now.toISOString().split('T')[0];
-  // Gültig bis = 30 Tage
+  // Gültig bis = heute + 30 Tage
   const gueltig = new Date(now); gueltig.setDate(gueltig.getDate() + 30);
   document.getElementById('gueltig-bis').value = gueltig.toISOString().split('T')[0];
+
   addPosition();
   updateFilename();
+
+  // Verknüpfte Rechnungsnummer anzeigen falls vorhanden
+  const linkedNr = sessionStorage.getItem('angebot_linked_rechnungsnr');
+  if (linkedNr) {
+    document.getElementById('link-indicator').style.display = 'flex';
+    document.getElementById('linked-invoice').textContent = linkedNr;
+    document.getElementById('verbindung-box').style.display = 'flex';
+    document.getElementById('verbindung-nr').textContent = linkedNr;
+  }
 });
 
-function addPosition() {
+function isMobile() { return window.innerWidth <= 640; }
+
+function addPosition(data) {
   positionCount++;
+  const id = positionCount;
+
+  // Desktop
   const tbody = document.getElementById('positions-body');
   const tr = document.createElement('tr');
-  tr.id = `pos-${positionCount}`;
+  tr.id = `pos-${id}`;
   tr.innerHTML = `
-    <td class="pos-nr">${positionCount}</td>
-    <td class="pos-desc"><input type="text" placeholder="Leistung beschreiben..." oninput="updateFilename()"></td>
-    <td class="pos-menge"><input type="number" value="1" min="0" step="0.01" oninput="recalcRow(this); recalc()"></td>
-    <td class="pos-menge"><input type="text" value="Std." placeholder="Stk/Std."></td>
-    <td class="pos-einzel"><input type="number" value="0" min="0" step="0.01" oninput="recalcRow(this); recalc()"></td>
-    <td class="pos-gesamt"><input type="number" value="0" readonly style="font-weight:bold; color:#1A6B3C;"></td>
-    <td class="pos-del"><button onclick="removePosition(${positionCount})" title="Entfernen">×</button></td>
+    <td class="pos-nr">${id}</td>
+    <td><input type="text" placeholder="Leistung beschreiben..." value="${data?.beschreibung||''}" oninput="updateFilename()"></td>
+    <td class="pos-menge"><input type="number" value="${data?.menge||1}" min="0" step="0.01" oninput="recalcDesktopRow(this);recalc()"></td>
+    <td class="pos-menge"><input type="text" value="${data?.einheit||'Std.'}" placeholder="Stk/Std."></td>
+    <td class="pos-einzel"><input type="number" value="${data?.einzelpreis||0}" min="0" step="0.01" oninput="recalcDesktopRow(this);recalc()"></td>
+    <td class="pos-gesamt"><input type="number" value="${data?.gesamt||0}" readonly style="font-weight:bold;color:#1A6B3C;"></td>
+    <td class="pos-del"><button onclick="removePosition(${id})" title="Entfernen">×</button></td>
   `;
   tbody.appendChild(tr);
-}
+  if (data) recalcDesktopRow(tr.querySelectorAll('input[type="number"]')[1]);
 
-function removePosition(id) {
-  const row = document.getElementById(`pos-${id}`);
-  if (row) row.remove();
+  // Mobile Karte
+  const mobileDiv = document.getElementById('mobile-positions');
+  const card = document.createElement('div');
+  card.className = 'pos-card';
+  card.id = `mpos-${id}`;
+  const gesamt = data ? (parseFloat(data.menge||1)*parseFloat(data.einzelpreis||0)) : 0;
+  card.innerHTML = `
+    <div class="pos-card-header">
+      <span class="pos-card-nr">Position ${id}</span>
+      <button class="pos-card-del" onclick="removePosition(${id})">×</button>
+    </div>
+    <div class="pos-card-grid">
+      <div class="full">
+        <label>Beschreibung</label>
+        <input type="text" value="${data?.beschreibung||''}" placeholder="Leistung beschreiben..."
+               oninput="syncFromMobile(${id});updateFilename()">
+      </div>
+      <div>
+        <label>Menge</label>
+        <input type="number" value="${data?.menge||1}" min="0" step="0.01"
+               oninput="syncFromMobile(${id});recalc()">
+      </div>
+      <div>
+        <label>Einheit</label>
+        <input type="text" value="${data?.einheit||'Std.'}" placeholder="Stk/Std."
+               oninput="syncFromMobile(${id})">
+      </div>
+      <div>
+        <label>Einzelpreis (€)</label>
+        <input type="number" value="${data?.einzelpreis||0}" min="0" step="0.01"
+               oninput="syncFromMobile(${id});recalc()">
+      </div>
+      <div>
+        <label>Gesamt</label>
+        <div class="gesamt-display" id="mpos-gesamt-${id}">${fmt(gesamt)}</div>
+      </div>
+    </div>
+  `;
+  mobileDiv.appendChild(card);
   recalc();
 }
 
-function recalcRow(input) {
+function removePosition(id) {
+  document.getElementById(`pos-${id}`)?.remove();
+  document.getElementById(`mpos-${id}`)?.remove();
+  recalc();
+}
+
+function syncFromMobile(id) {
+  const card = document.getElementById(`mpos-${id}`);
+  const row  = document.getElementById(`pos-${id}`);
+  if (!card || !row) return;
+  const ci = card.querySelectorAll('input');
+  const ri = row.querySelectorAll('input');
+  ri[0].value = ci[0].value;
+  ri[1].value = ci[1].value;
+  ri[2].value = ci[2].value;
+  ri[3].value = ci[3].value;
+  recalcDesktopRow(ri[3]);
+  const gesamt = (parseFloat(ci[1].value)||0) * (parseFloat(ci[3].value)||0);
+  ri[4].value = gesamt.toFixed(2);
+  const el = document.getElementById(`mpos-gesamt-${id}`);
+  if (el) el.textContent = fmt(gesamt);
+}
+
+function recalcDesktopRow(input) {
   const row = input.closest('tr');
+  if (!row) return;
   const inputs = row.querySelectorAll('input[type="number"]');
-  const menge = parseFloat(inputs[0].value) || 0;
+  const menge  = parseFloat(inputs[0].value) || 0;
   const einzel = parseFloat(inputs[1].value) || 0;
   inputs[2].value = (menge * einzel).toFixed(2);
 }
 
 function recalc() {
+  if (isMobile()) {
+    [...document.querySelectorAll('.pos-card')].forEach(c => {
+      syncFromMobile(parseInt(c.id.replace('mpos-','')));
+    });
+  }
   const rows = document.querySelectorAll('#positions-body tr');
   let netto = 0;
   rows.forEach(row => {
@@ -636,15 +636,14 @@ function recalc() {
   });
   const mwstSatz = parseInt(document.getElementById('mwst-satz').value);
   const mwst = netto * mwstSatz / 100;
-  const gesamt = netto + mwst;
-  document.getElementById('netto').textContent = fmt(netto);
-  document.getElementById('mwst-betrag').textContent = fmt(mwst);
-  document.getElementById('gesamt-display').textContent = fmt(gesamt);
+  document.getElementById('netto').textContent        = fmt(netto);
+  document.getElementById('mwst-betrag').textContent  = fmt(mwst);
+  document.getElementById('gesamt-display').textContent = fmt(netto + mwst);
   updateFilename();
 }
 
 function fmt(n) {
-  return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  return n.toLocaleString('de-DE', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' €';
 }
 
 function getGesamtRaw() {
@@ -659,104 +658,117 @@ function getGesamtRaw() {
 }
 
 function updateFilename() {
+  const typ     = document.getElementById('meta-typ').value     || 'ANG';
   const branche = document.getElementById('meta-branche').value || '____';
-  const jahr = document.getElementById('meta-jahr').value || '2026';
-  const monat = document.getElementById('meta-monat').value || '01';
-  const status = document.getElementById('meta-status').value || 'OFFEN';
-  const betreff = (document.getElementById('betreff')?.value || '____')
-    .replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').substring(0, 20);
+  const jahr    = document.getElementById('meta-jahr').value    || '2026';
+  const monat   = document.getElementById('meta-monat').value   || '01';
+  const status  = document.getElementById('meta-status').value  || 'OFFEN';
+  const kat     = document.getElementById('meta-kategorie').value || 'BE';
+  const betreff = (document.getElementById('betreff')?.value || '')
+    .replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-äöüÄÖÜß]/g,'').substring(0,20) || '____';
   const betrag = getGesamtRaw();
-  const kat = document.getElementById('meta-kategorie').value || 'BE';
-  const name = `ANG_${branche}_${jahr}-${monat}_${betreff}_${betrag}EUR_${status}_${kat}.ww`;
+  const name = `${typ}_${branche}_${jahr}-${monat}_${betreff}_${betrag}EUR_${status}_${kat}.ww`;
   document.getElementById('filename-display').textContent = name;
   return name;
 }
 
-function updateStatus() {
-  const status = document.getElementById('meta-status').value;
-  const badge = document.getElementById('status-badge');
-  badge.className = 'status-badge';
-  if (status === 'OFFEN') { badge.classList.add('status-offen'); badge.textContent = '● Offen'; }
-  else if (status === 'ANGENOM') { badge.classList.add('status-angenommen'); badge.textContent = '✓ Angenommen'; }
-  else { badge.classList.add('status-abgelehnt'); badge.textContent = '✗ Abgelehnt'; }
-}
-
 function buildData(anonym) {
+  if (isMobile()) {
+    [...document.querySelectorAll('.pos-card')].forEach(c => {
+      syncFromMobile(parseInt(c.id.replace('mpos-','')));
+    });
+  }
   const rows = document.querySelectorAll('#positions-body tr');
   const positionen = [];
   rows.forEach(row => {
     const inputs = row.querySelectorAll('input');
     positionen.push({
-      beschreibung: inputs[0]?.value || '',
-      menge: inputs[1]?.value || '',
-      einheit: inputs[2]?.value || '',
-      einzelpreis: inputs[3]?.value || '',
-      gesamt: inputs[4]?.value || ''
+      beschreibung: inputs[0]?.value||'',
+      menge:        inputs[1]?.value||'',
+      einheit:      inputs[2]?.value||'',
+      einzelpreis:  inputs[3]?.value||'',
+      gesamt:       inputs[4]?.value||''
     });
   });
 
   const kern = {
-    typ: 'ANG',
-    branche: document.getElementById('meta-branche').value,
-    periode: `${document.getElementById('meta-jahr').value}-${document.getElementById('meta-monat').value}`,
-    kategorie: document.getElementById('meta-kategorie').value,
-    status: document.getElementById('meta-status').value,
-    betreff: document.getElementById('betreff').value,
-    leistungsumfang: document.getElementById('leistungsumfang').value,
+    typ:           document.getElementById('meta-typ').value,
+    branche:       document.getElementById('meta-branche').value,
+    periode:       `${document.getElementById('meta-jahr').value}-${document.getElementById('meta-monat').value}`,
+    status:        document.getElementById('meta-status').value,
+    kategorie:     document.getElementById('meta-kategorie').value,
+    angebotsnr:    document.getElementById('angebotsnr').value,
+    angebotsdatum: document.getElementById('angebotsdatum').value,
+    gueltig_bis:   document.getElementById('gueltig-bis').value,
+    lieferdatum:   document.getElementById('lieferdatum').value,
+    betreff:       document.getElementById('betreff').value,
     positionen,
-    netto: document.getElementById('netto').textContent,
-    mwst_satz: document.getElementById('mwst-satz').value + '%',
-    mwst_betrag: document.getElementById('mwst-betrag').textContent,
-    gesamt: document.getElementById('gesamt-display').textContent,
+    netto:         document.getElementById('netto').textContent,
+    mwst_satz:     document.getElementById('mwst-satz').value + '%',
+    mwst_betrag:   document.getElementById('mwst-betrag').textContent,
+    gesamt:        document.getElementById('gesamt-display').textContent,
     zahlungsbedingungen: document.getElementById('zahlungsbedingungen').value,
-    angebotsnr: document.getElementById('angebotsnr').value,
-    gueltig_bis: document.getElementById('gueltig-bis').value,
-    wunsch_start: document.getElementById('wunsch-start').value,
   };
 
-  if (anonym) return { schicht: 'KERN_ONLY_ANONYM', typ: 'ANG', daten: kern };
+  if (anonym) return { schicht: 'KERN_ONLY_ANONYM', daten: kern };
 
   return {
     schicht: 'VOLLSTAENDIG',
-    typ: 'ANG',
     privat: {
-      absender_name: document.getElementById('absender-name').value,
-      absender_adresse: document.getElementById('absender-adresse').value,
-      empfaenger_name: document.getElementById('empfaenger-name').value,
+      absender_name:      document.getElementById('absender-name').value,
+      absender_adresse:   document.getElementById('absender-adresse').value,
+      empfaenger_name:    document.getElementById('empfaenger-name').value,
       empfaenger_adresse: document.getElementById('empfaenger-adresse').value,
-      angebotsnr: document.getElementById('angebotsnr').value,
-      angebotsdatum: document.getElementById('angebotsdatum').value,
-      iban: document.getElementById('iban').value,
-      steuernr: document.getElementById('steuernr').value,
-      kontakt: document.getElementById('kontakt').value,
+      iban:               document.getElementById('iban').value,
+      steuernr:           document.getElementById('steuernr').value,
+      kontakt:            document.getElementById('kontakt').value,
     },
     kern
   };
 }
 
+// ── ANGEBOT → RECHNUNG ────────────────────────────────────────────────────────
+function zuRechnung() {
+  recalc();
+  const data = buildData(false);
+
+  // Alles in sessionStorage legen — Rechnung liest das beim Öffnen
+  sessionStorage.setItem('ww_angebot_data', JSON.stringify(data));
+  sessionStorage.setItem('ww_angebot_filename', updateFilename());
+
+  // Status auf Angenommen setzen
+  document.getElementById('meta-status').value = 'ANGENOM';
+  updateFilename();
+
+  // Rechnungsnummer vorschlagen
+  const angNr = document.getElementById('angebotsnr').value || 'unbekannt';
+  const rNr = angNr.replace('ANG-','REC-').replace('ANG_','REC_');
+  sessionStorage.setItem('ww_vorgeschlagene_rechnungsnr', rNr);
+
+  // Verbindungsbox anzeigen
+  document.getElementById('verbindung-box').style.display = 'flex';
+  document.getElementById('verbindung-nr').textContent = rNr;
+
+  // Zur Rechnung navigieren
+  if (confirm('Angebotsdaten werden in das Rechnungsformular übertragen.\n\nJetzt zur Rechnung wechseln?')) {
+    window.location.href = 'rechnung-2.html';
+  }
+}
+
 function saveOriginal() {
-  const filename = updateFilename().replace('ANG_', 'ORIG_ANG_');
+  recalc();
+  const filename = updateFilename();
   downloadJSON(buildData(false), filename);
 }
-
 function saveAnonym() {
-  const filename = updateFilename().replace('ANG_', 'ANON_ANG_');
+  recalc();
+  const filename = updateFilename().replace(/^[A-Z]+_/, 'ANON_');
   downloadJSON(buildData(true), filename);
 }
-
-// KERN: Angebot → Rechnung übernehmen
-function zuRechnung() {
-  const data = buildData(false);
-  // Daten als URL-Parameter übergeben (vereinfacht als localStorage-ähnlich via sessionStorage)
-  sessionStorage.setItem('angebot_zu_rechnung', JSON.stringify(data));
-  sessionStorage.setItem('angebot_filename', updateFilename());
-  alert('Daten gespeichert! Öffne jetzt das Rechnungsformular – die Daten werden automatisch übernommen.\n\nDateiname: ' + updateFilename());
-}
-
 function downloadJSON(data, filename) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
 }

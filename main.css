@@ -3002,12 +3002,10 @@ body.is-touch .tiles article .content {
 #header .logo {
 	display: block;
 	border-bottom: 0;
-	color: inherit;
-	font-weight: 900;
-	letter-spacing: 0.35em;
+	color: black;
+
 	margin: 0 0 2.5em 0;
 	text-decoration: none;
-	text-transform: uppercase;
 	display: inline-block;
 }
 
@@ -3020,10 +3018,12 @@ body.is-touch .tiles article .content {
 	margin-right: 0.65em;
 }
 
-#header .logo .symbol img {
-	display: block;
-	width: 2em;
-	height: 2em;
+#header .logo img {
+	display: inline-block;
+	width: 7em;
+	height: 7em;
+	margin: 0;
+	padding: 20px;
 }
 
 #header nav {

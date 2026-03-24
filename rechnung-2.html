@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WISSEN.WERKZEUG – Rechnungsformular</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    padding: 12px;
+    color: #1a1a1a;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    background: #1A3A5C;
+    color: white;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .toolbar h1 { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+  .toolbar-sub { font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
+
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 9px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-original { background: #1A6B3C; color: white; }
+  .btn-anonym   { background: #C25A00; color: white; }
+  .btn-print    { background: #ffffff33; color: white; border: 1px solid #ffffff55; }
+  .btn:hover    { opacity: 0.85; transform: translateY(-1px); }
+
+  /* ── DATEINAME ── */
+  .filename-preview {
+    background: #1E1E1E;
+    color: #A8D8A8;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 9px 14px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filename-label { color: #888; font-size: 11px; white-space: nowrap; padding-top: 1px; }
+  #filename-display { color: #FFD700; word-break: break-all; }
+
+  /* ── META-BAR ── */
+  .meta-bar {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .meta-bar label {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .meta-bar select,
+  .meta-bar input {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    background: #f9f9f9;
+  }
+
+  /* ── RECHNUNG ── */
+  .invoice {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* KOPF */
+  .invoice-header {
+    background: #f8f9fa;
+    border-bottom: 3px solid #1A3A5C;
+    padding: 18px 16px;
+    position: relative;
+  }
+  .privacy-badge {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: #FDEAEA;
+    color: #8B1A1A;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #cc000033;
+  }
+
+  .header-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field-group label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field-group input,
+  .field-group textarea {
+    padding: 8px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    background: white;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field-group input:focus,
+  .field-group textarea:focus {
+    outline: none;
+    border-color: #1A3A5C;
+  }
+  .field-group textarea { resize: vertical; min-height: 56px; }
+
+  .invoice-number-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #eee;
+  }
+
+  /* BODY */
+  .invoice-body {
+    padding: 18px 16px;
+    border-bottom: 2px solid #eee;
+  }
+  .section-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+  }
+
+  /* POSITIONEN – Desktop */
+  .positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+  }
+  .positions-table th {
+    background: #1A3A5C;
+    color: white;
+    padding: 8px 8px;
+    font-size: 11px;
+    text-align: left;
+  }
+  .positions-table th.right { text-align: right; }
+  .positions-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .positions-table tr:nth-child(even) td { background: #f9fbff; }
+  .positions-table input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    padding: 2px 0;
+  }
+  .positions-table input:focus {
+    outline: none;
+    background: #fff9e6;
+    border-radius: 3px;
+    padding: 2px 4px;
+  }
+  .pos-nr     { width: 34px; text-align: center; color: #888; font-size: 11px; }
+  .pos-desc   { min-width: 160px; }
+  .pos-menge  { width: 64px; }
+  .pos-einzel { width: 90px; }
+  .pos-gesamt { width: 90px; font-weight: bold; }
+  .pos-del    { width: 28px; text-align: center; }
+  .pos-menge input, .pos-einzel input, .pos-gesamt input { text-align: right; }
+  .pos-del button {
+    background: none; border: none; color: #ccc;
+    cursor: pointer; font-size: 16px; padding: 0; transition: color 0.2s;
+  }
+  .pos-del button:hover { color: #cc0000; }
+
+  /* POSITIONEN – Mobil als Karten */
+  .pos-card { display: none; }
+
+  .add-pos-btn {
+    background: none;
+    border: 1px dashed #1A3A5C;
+    color: #1A3A5C;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+    transition: all 0.2s;
+    margin-bottom: 14px;
+  }
+  .add-pos-btn:hover { background: #E8F0F8; }
+
+  /* SUMMEN */
+  .totals { display: flex; justify-content: flex-end; }
+  .totals-box { width: 260px; }
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .totals-row.total {
+    font-weight: bold;
+    font-size: 15px;
+    border-top: 2px solid #1A3A5C;
+    border-bottom: none;
+    padding-top: 8px;
+    margin-top: 4px;
+    color: #1A3A5C;
+  }
+  .totals-row select {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 12px;
+    background: #f9f9f9;
+  }
+
+  /* FUSSZEILE */
+  .invoice-footer {
+    background: #f8f9fa;
+    padding: 16px;
+    border-top: 2px solid #eee;
+    position: relative;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  .footer-field label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .footer-field input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 12px;
+    background: white;
+  }
+  .footer-field input:focus { outline: none; border-color: #1A3A5C; }
+
+  /* ANONYM */
+  .anonym-indicator {
+    display: none;
+    background: #FDF0E6;
+    border: 2px dashed #C25A00;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #C25A00;
+    text-align: center;
+    margin: 4px 16px;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: white; padding: 0; }
+    .toolbar, .meta-bar, .filename-preview, .add-pos-btn, .pos-del,
+    .privacy-badge, .hide-on-print { display: none !important; }
+    .invoice { border: none; box-shadow: none; border-radius: 0; }
+    input, textarea, select { border: none !important; background: transparent !important; }
+    .positions-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .invoice-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .anonym-hidden { visibility: hidden; }
+  }
+
+  /* ── MOBIL ── */
+  @media (max-width: 640px) {
+
+    body { padding: 8px; }
+
+    /* Toolbar stacked */
+    .toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .btn-group { width: 100%; }
+    .btn { flex: 1; text-align: center; font-size: 12px; padding: 10px 6px; }
+
+    /* Meta-bar single column */
+    .meta-bar { grid-template-columns: 1fr 1fr; }
+
+    /* Header stacked */
+    .header-grid { grid-template-columns: 1fr; gap: 12px; }
+    .invoice-number-row { grid-template-columns: 1fr 1fr; }
+    .invoice-number-row .field-group:last-child { grid-column: 1 / -1; }
+
+    /* Positionen – Tabelle ausblenden, Karten einblenden */
+    .positions-table { display: none; }
+    .pos-card {
+      display: block;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #f9fbff;
+    }
+    .pos-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .pos-card-nr {
+      font-size: 11px;
+      color: #888;
+      font-weight: bold;
+    }
+    .pos-card-del {
+      background: none; border: none; color: #ccc;
+      cursor: pointer; font-size: 18px; padding: 0; line-height: 1;
+    }
+    .pos-card-del:hover { color: #cc0000; }
+    .pos-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .pos-card-grid .full { grid-column: 1 / -1; }
+    .pos-card label {
+      font-size: 10px; color: #888; text-transform: uppercase;
+      letter-spacing: 0.4px; display: block; margin-bottom: 3px;
+    }
+    .pos-card input {
+      width: 100%; padding: 7px 8px; border: 1px solid #e0e0e0;
+      border-radius: 4px; font-size: 13px; font-family: Arial, sans-serif;
+      background: white;
+    }
+    .pos-card input:focus { outline: none; border-color: #1A3A5C; }
+    .pos-card .gesamt-display {
+      font-weight: bold; color: #1A3A5C; padding: 7px 8px;
+      background: #E8F0F8; border-radius: 4px; font-size: 13px;
+    }
+
+    /* Summen voll breit */
+    .totals { justify-content: stretch; }
+    .totals-box { width: 100%; }
+
+    /* Footer stacked */
+    .footer-grid { grid-template-columns: 1fr; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div>
+    <div class="toolbar-sub">WISSEN.WERKZEUG</div>
+    <h1>RECHNUNGSFORMULAR</h1>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-print"    onclick="window.print()">🖨️ Drucken</button>
+    <button class="btn btn-original" onclick="saveOriginal()">💾 Original</button>
+    <button class="btn btn-anonym"   onclick="saveAnonym()">🔒 Anonym</button>
+  </div>
+</div>
+
+<!-- DATEINAME PREVIEW -->
+<div class="filename-preview">
+  <span class="filename-label">Dateiname:</span>
+  <span id="filename-display">AUS_____2026-03_____EUR.ww</span>
+</div>
+
+<!-- META FELDER -->
+<div class="meta-bar">
+  <div>
+    <label>Typ</label>
+    <select id="meta-typ" onchange="updateFilename()">
+      <option value="AUS">AUS – Ausgangsrechnung</option>
+      <option value="EIN">EIN – Eingangsrechnung</option>
+      <option value="GUT">GUT – Gutschrift</option>
+    </select>
+  </div>
+  <div>
+    <label>Branche</label>
+    <select id="meta-branche" onchange="updateFilename()">
+      <option value="">– wählen –</option>
+      <option value="BERA">Beratung</option>
+      <option value="BILD">Bildung</option>
+      <option value="BAU">Bau / Sanierung</option>
+      <option value="DIENST">Dienstleistungen</option>
+      <option value="GAST">Gastronomie</option>
+      <option value="HAND">Handwerk</option>
+      <option value="HANDEL">Handel</option>
+      <option value="KREA">Kreativ / Kunst</option>
+      <option value="MED">Medizin / Gesundheit</option>
+      <option value="TECH">Technik / IT</option>
+      <option value="SONST">Sonstiges</option>
+    </select>
+  </div>
+  <div>
+    <label>Jahr</label>
+    <select id="meta-jahr" onchange="updateFilename()"></select>
+  </div>
+  <div>
+    <label>Monat</label>
+    <select id="meta-monat" onchange="updateFilename()">
+      <option value="01">Januar</option>
+      <option value="02">Februar</option>
+      <option value="03">März</option>
+      <option value="04">April</option>
+      <option value="05">Mai</option>
+      <option value="06">Juni</option>
+      <option value="07">Juli</option>
+      <option value="08">August</option>
+      <option value="09">September</option>
+      <option value="10">Oktober</option>
+      <option value="11">November</option>
+      <option value="12">Dezember</option>
+    </select>
+  </div>
+  <div>
+    <label>Kategorie</label>
+    <select id="meta-kategorie" onchange="updateFilename()">
+      <option value="BE">BE – Berechenbar</option>
+      <option value="ZA">ZA – Zeitabhängig</option>
+      <option value="KO">KO – Kontextuell</option>
+    </select>
+  </div>
+</div>
+
+<!-- RECHNUNG -->
+<div class="invoice">
+
+  <!-- KOPF -->
+  <div class="invoice-header" id="invoice-header">
+    <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
+    <div class="header-grid">
+      <div class="field-group">
+        <label>Absender – Name / Firma</label>
+        <input type="text" id="absender-name" placeholder="Dein Name oder Firmenname" oninput="updateFilename()">
+        <label>Adresse</label>
+        <textarea id="absender-adresse" placeholder="Straße, PLZ Ort"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Empfänger – Name / Firma</label>
+        <input type="text" id="empfaenger-name" placeholder="Empfänger Name oder Firma">
+        <label>Adresse Empfänger</label>
+        <textarea id="empfaenger-adresse" placeholder="Straße, PLZ Ort"></textarea>
+      </div>
+    </div>
+    <div class="invoice-number-row">
+      <div class="field-group">
+        <label>Rechnungsnummer</label>
+        <input type="text" id="rechnungsnr" placeholder="z.B. 2026-001">
+      </div>
+      <div class="field-group">
+        <label>Rechnungsdatum</label>
+        <input type="date" id="rechnungsdatum">
+      </div>
+      <div class="field-group">
+        <label>Leistungsdatum</label>
+        <input type="date" id="leistungsdatum">
+      </div>
+    </div>
+  </div>
+
+  <!-- ANONYM HINWEIS -->
+  <div class="anonym-indicator" id="anonym-indicator">
+    🔒 ANONYM-MODUS: Kopf und Fußzeile werden beim Speichern entfernt
+  </div>
+
+  <!-- BODY -->
+  <div class="invoice-body">
+    <div class="section-label">Leistungsbeschreibung</div>
+
+    <div class="field-group" style="margin-bottom:14px;">
+      <label>Betreff / Kurzbeschreibung</label>
+      <input type="text" id="betreff" placeholder="z.B. Webdesign Projekt, Reparatur Heizung, Beratungsleistung..."
+             oninput="updateFilename()" style="font-size:14px; padding:10px;">
+    </div>
+
+    <div class="section-label">Positionen</div>
+
+    <!-- Desktop-Tabelle -->
+    <table class="positions-table" id="positions-table">
+      <thead>
+        <tr>
+          <th class="pos-nr">Nr.</th>
+          <th class="pos-desc">Beschreibung</th>
+          <th class="pos-menge right">Menge</th>
+          <th class="pos-menge right">Einheit</th>
+          <th class="pos-einzel right">Einzelpreis</th>
+          <th class="pos-gesamt right">Gesamt</th>
+          <th class="pos-del"></th>
+        </tr>
+      </thead>
+      <tbody id="positions-body"></tbody>
+    </table>
+
+    <!-- Mobile Karten -->
+    <div id="mobile-positions"></div>
+
+    <button class="add-pos-btn" onclick="addPosition()">+ Position hinzufügen</button>
+
+    <!-- SUMMEN -->
+    <div class="totals">
+      <div class="totals-box">
+        <div class="totals-row">
+          <span>Nettobetrag</span>
+          <span id="netto">0,00 €</span>
+        </div>
+        <div class="totals-row">
+          <span>MwSt
+            <select id="mwst-satz" onchange="recalc()">
+              <option value="0">0%</option>
+              <option value="7">7%</option>
+              <option value="19" selected>19%</option>
+            </select>
+          </span>
+          <span id="mwst-betrag">0,00 €</span>
+        </div>
+        <div class="totals-row total">
+          <span>Gesamtbetrag</span>
+          <span id="gesamt-display">0,00 €</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group" style="margin-top:16px;">
+      <label>Zahlungsbedingungen / Hinweise</label>
+      <input type="text" id="zahlungsbedingungen" placeholder="z.B. Zahlbar innerhalb von 14 Tagen ohne Abzug">
+    </div>
+  </div>
+
+  <!-- FUSSZEILE -->
+  <div class="invoice-footer" id="invoice-footer">
+    <div class="privacy-badge">🔒 Schicht 1 – Privat</div>
+    <div class="footer-grid">
+      <div class="footer-field">
+        <label>Bank / IBAN</label>
+        <input type="text" id="iban" placeholder="DE00 0000 0000 0000 0000 00">
+      </div>
+      <div class="footer-field">
+        <label>Steuernummer / USt-ID</label>
+        <input type="text" id="steuernr" placeholder="DE123456789">
+      </div>
+      <div class="footer-field">
+        <label>Kontakt / Email / Web</label>
+        <input type="text" id="kontakt" placeholder="email@beispiel.de">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let positionCount = 0;
+
+// Initialisierung
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  // Jahres-Dropdown
+  const jahrSelect = document.getElementById('meta-jahr');
+  for (let y = now.getFullYear(); y >= 2020; y--) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    if (y === now.getFullYear()) opt.selected = true;
+    jahrSelect.appendChild(opt);
+  }
+  document.getElementById('meta-monat').value = String(now.getMonth() + 1).padStart(2, '0');
+  document.getElementById('rechnungsdatum').value = now.toISOString().split('T')[0];
+  // ANGEBOT-DATEN UEBERNEHMEN
+  const angebotRaw = sessionStorage.getItem('ww_angebot_data');
+  if (angebotRaw) {
+    try {
+      const ang = JSON.parse(angebotRaw);
+      const k = ang.kern || {};
+      const p = ang.privat || {};
+      if (k.branche) document.getElementById('meta-branche').value = k.branche;
+      if (k.kategorie) document.getElementById('meta-kategorie').value = k.kategorie;
+      if (k.periode) {
+        const parts = k.periode.split('-');
+        if (parts[0]) document.getElementById('meta-jahr').value = parts[0];
+        if (parts[1]) document.getElementById('meta-monat').value = parts[1];
+      }
+      if (p.absender_name)      document.getElementById('absender-name').value      = p.absender_name;
+      if (p.absender_adresse)   document.getElementById('absender-adresse').value   = p.absender_adresse;
+      if (p.empfaenger_name)    document.getElementById('empfaenger-name').value    = p.empfaenger_name;
+      if (p.empfaenger_adresse) document.getElementById('empfaenger-adresse').value = p.empfaenger_adresse;
+      if (p.iban)     document.getElementById('iban').value     = p.iban;
+      if (p.steuernr) document.getElementById('steuernr').value = p.steuernr;
+      if (p.kontakt)  document.getElementById('kontakt').value  = p.kontakt;
+      if (k.betreff)  document.getElementById('betreff').value  = k.betreff;
+      if (k.zahlungsbedingungen) document.getElementById('zahlungsbedingungen').value = k.zahlungsbedingungen;
+      const rNr = sessionStorage.getItem('ww_vorgeschlagene_rechnungsnr');
+      if (rNr) document.getElementById('rechnungsnr').value = rNr;
+      if (k.mwst_satz) {
+        const satz = parseInt(k.mwst_satz);
+        if ([0,7,19].includes(satz)) document.getElementById('mwst-satz').value = satz;
+      }
+      if (k.lieferdatum) document.getElementById('leistungsdatum').value = k.lieferdatum;
+      if (k.positionen && k.positionen.length > 0) {
+        k.positionen.forEach(function(pos) { addPosition(pos); });
+      } else { addPosition(); }
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#E8F5EE;border:2px solid #1A6B3C;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#1A6B3C;font-family:Arial,sans-serif;';
+      banner.innerHTML = '&#x2705; <strong>Angebotsdaten übernommen.</strong> Bitte Rechnungsnummer und Datum prüfen.';
+      document.querySelector('.invoice').insertAdjacentElement('beforebegin', banner);
+      setTimeout(function(){ banner.remove(); }, 8000);
+      sessionStorage.removeItem('ww_angebot_data');
+      sessionStorage.removeItem('ww_angebot_filename');
+      sessionStorage.removeItem('ww_vorgeschlagene_rechnungsnr');
+    } catch(e) { console.error('Import fehlgeschlagen:', e); addPosition(); }
+  } else {
+    addPosition();
+  }
+  updateFilename();
+});
+
+function isMobile() {
+  return window.innerWidth <= 640;
+}
+
+function addPosition() {
+  positionCount++;
+  const id = positionCount;
+
+  // Desktop-Zeile
+  const tbody = document.getElementById('positions-body');
+  const tr = document.createElement('tr');
+  tr.id = `pos-${id}`;
+  tr.innerHTML = `
+    <td class="pos-nr">${id}</td>
+    <td class="pos-desc"><input type="text" placeholder="Leistung beschreiben..." oninput="updateFilename()"></td>
+    <td class="pos-menge"><input type="number" value="1" min="0" step="0.01" oninput="recalcDesktopRow(this); recalc()"></td>
+    <td class="pos-menge"><input type="text" value="Std." placeholder="Stk/Std."></td>
+    <td class="pos-einzel"><input type="number" value="0" min="0" step="0.01" oninput="recalcDesktopRow(this); recalc()"></td>
+    <td class="pos-gesamt"><input type="number" value="0" readonly style="font-weight:bold; color:#1A3A5C;"></td>
+    <td class="pos-del"><button onclick="removePosition(${id})" title="Entfernen">×</button></td>
+  `;
+  tbody.appendChild(tr);
+
+  // Mobile-Karte
+  const mobileDiv = document.getElementById('mobile-positions');
+  const card = document.createElement('div');
+  card.className = 'pos-card';
+  card.id = `mpos-${id}`;
+  const _desc = data&&data.beschreibung?data.beschreibung:'';
+  const _menge = data&&data.menge?data.menge:1;
+  const _einheit = data&&data.einheit?data.einheit:'Std.';
+  const _einzel = data&&data.einzelpreis?data.einzelpreis:0;
+  const _gesamt = data&&data.gesamt?parseFloat(data.gesamt):0;
+  card.innerHTML = `
+    <div class="pos-card-header">
+      <span class="pos-card-nr">Position ${id}</span>
+      <button class="pos-card-del" onclick="removePosition(${id})" title="Entfernen">×</button>
+    </div>
+    <div class="pos-card-grid">
+      <div class="full">
+        <label>Beschreibung</label>
+        <input type="text" value="${_desc}" placeholder="Leistung beschreiben..."
+               oninput="syncFromMobile(${id}); updateFilename()">
+      </div>
+      <div>
+        <label>Menge</label>
+        <input type="number" value="${_menge}" min="0" step="0.01"
+               oninput="syncFromMobile(${id}); recalc()">
+      </div>
+      <div>
+        <label>Einheit</label>
+        <input type="text" value="${_einheit}" placeholder="Stk/Std."
+               oninput="syncFromMobile(${id})">
+      </div>
+      <div>
+        <label>Einzelpreis (€)</label>
+        <input type="number" value="${_einzel}" min="0" step="0.01"
+               oninput="syncFromMobile(${id}); recalc()">
+      </div>
+      <div>
+        <label>Gesamt</label>
+        <div class="gesamt-display" id="mpos-gesamt-${id}">${_gesamt.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} €</div>
+      </div>
+    </div>
+  `;
+  mobileDiv.appendChild(card);
+  recalc();
+}
+
+function removePosition(id) {
+  const row  = document.getElementById(`pos-${id}`);
+  const card = document.getElementById(`mpos-${id}`);
+  if (row)  row.remove();
+  if (card) card.remove();
+  recalc();
+}
+
+// Mobile → Desktop synchronisieren (für Speichern)
+function syncFromMobile(id) {
+  const card = document.getElementById(`mpos-${id}`);
+  const row  = document.getElementById(`pos-${id}`);
+  if (!card || !row) return;
+  const ci = card.querySelectorAll('input');
+  const ri = row.querySelectorAll('input');
+  ri[0].value = ci[0].value; // beschreibung
+  ri[1].value = ci[1].value; // menge
+  ri[2].value = ci[2].value; // einheit
+  ri[3].value = ci[3].value; // einzelpreis
+  recalcDesktopRow(ri[3]);
+  // Gesamt in Karte aktualisieren
+  const menge  = parseFloat(ci[1].value) || 0;
+  const einzel = parseFloat(ci[3].value) || 0;
+  const gesamt = menge * einzel;
+  ri[4].value = gesamt.toFixed(2);
+  const gesamtEl = document.getElementById(`mpos-gesamt-${id}`);
+  if (gesamtEl) gesamtEl.textContent = fmt(gesamt);
+}
+
+function recalcDesktopRow(input) {
+  const row = input.closest('tr');
+  if (!row) return;
+  const inputs = row.querySelectorAll('input[type="number"]');
+  const menge  = parseFloat(inputs[0].value) || 0;
+  const einzel = parseFloat(inputs[1].value) || 0;
+  inputs[2].value = (menge * einzel).toFixed(2);
+}
+
+function recalc() {
+  // Summe aus Desktop-Tabelle (immer aktuell, da Mobile sync)
+  const rows = document.querySelectorAll('#positions-body tr');
+  let netto = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input[type="number"]');
+    if (inputs.length >= 3) netto += parseFloat(inputs[2].value) || 0;
+  });
+
+  // Mobile-Karten auch einbeziehen, falls noch nicht synchronisiert
+  if (isMobile()) {
+    const ids = [...document.querySelectorAll('.pos-card')].map(c => c.id.replace('mpos-', ''));
+    ids.forEach(id => syncFromMobile(parseInt(id)));
+    // neu summieren
+    netto = 0;
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input[type="number"]');
+      if (inputs.length >= 3) netto += parseFloat(inputs[2].value) || 0;
+    });
+  }
+
+  const mwstSatz = parseInt(document.getElementById('mwst-satz').value);
+  const mwst = netto * mwstSatz / 100;
+  const gesamt = netto + mwst;
+
+  document.getElementById('netto').textContent         = fmt(netto);
+  document.getElementById('mwst-betrag').textContent   = fmt(mwst);
+  document.getElementById('gesamt-display').textContent = fmt(gesamt);
+  updateFilename();
+}
+
+function fmt(n) {
+  return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+function getGesamtRaw() {
+  const rows = document.querySelectorAll('#positions-body tr');
+  let netto = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input[type="number"]');
+    if (inputs.length >= 3) netto += parseFloat(inputs[2].value) || 0;
+  });
+  const mwstSatz = parseInt(document.getElementById('mwst-satz').value);
+  return Math.round(netto * (1 + mwstSatz / 100));
+}
+
+function updateFilename() {
+  const typ     = document.getElementById('meta-typ').value      || 'AUS';
+  const branche = document.getElementById('meta-branche').value  || '____';
+  const jahr    = document.getElementById('meta-jahr').value     || '2026';
+  const monat   = document.getElementById('meta-monat').value    || '01';
+  const betreff = (document.getElementById('betreff')?.value || '')
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9\-äöüÄÖÜß]/g, '')
+    .substring(0, 20) || '____';
+  const betrag  = getGesamtRaw();
+  const kat     = document.getElementById('meta-kategorie').value || 'BE';
+  const name    = `${typ}_${branche}_${jahr}-${monat}_${betreff}_${betrag}EUR_${kat}.ww`;
+  document.getElementById('filename-display').textContent = name;
+  return name;
+}
+
+function buildData(anonym) {
+  // Mobile zuerst synchronisieren
+  const ids = [...document.querySelectorAll('.pos-card')].map(c => c.id.replace('mpos-', ''));
+  ids.forEach(id => syncFromMobile(parseInt(id)));
+
+  const rows = document.querySelectorAll('#positions-body tr');
+  const positionen = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    positionen.push({
+      beschreibung: inputs[0]?.value || '',
+      menge:        inputs[1]?.value || '',
+      einheit:      inputs[2]?.value || '',
+      einzelpreis:  inputs[3]?.value || '',
+      gesamt:       inputs[4]?.value || ''
+    });
+  });
+
+  const kern = {
+    typ:               document.getElementById('meta-typ').value,
+    branche:           document.getElementById('meta-branche').value,
+    periode:           `${document.getElementById('meta-jahr').value}-${document.getElementById('meta-monat').value}`,
+    kategorie:         document.getElementById('meta-kategorie').value,
+    betreff:           document.getElementById('betreff').value,
+    positionen,
+    netto:             document.getElementById('netto').textContent,
+    mwst_satz:         document.getElementById('mwst-satz').value + '%',
+    mwst_betrag:       document.getElementById('mwst-betrag').textContent,
+    gesamt:            document.getElementById('gesamt-display').textContent,
+    zahlungsbedingungen: document.getElementById('zahlungsbedingungen').value,
+  };
+
+  if (anonym) return { schicht: 'KERN_ONLY_ANONYM', daten: kern };
+
+  return {
+    schicht: 'VOLLSTAENDIG',
+    privat: {
+      absender_name:      document.getElementById('absender-name').value,
+      absender_adresse:   document.getElementById('absender-adresse').value,
+      empfaenger_name:    document.getElementById('empfaenger-name').value,
+      empfaenger_adresse: document.getElementById('empfaenger-adresse').value,
+      rechnungsnr:        document.getElementById('rechnungsnr').value,
+      rechnungsdatum:     document.getElementById('rechnungsdatum').value,
+      leistungsdatum:     document.getElementById('leistungsdatum').value,
+      iban:               document.getElementById('iban').value,
+      steuernr:           document.getElementById('steuernr').value,
+      kontakt:            document.getElementById('kontakt').value,
+    },
+    kern
+  };
+}
+
+function saveOriginal() {
+  recalc();
+  const filename = updateFilename().replace('AUS_', 'ORIG_AUS_');
+  downloadJSON(buildData(false), filename);
+}
+
+function saveAnonym() {
+  recalc();
+  const filename = updateFilename().replace(/^[A-Z]+_/, 'ANON_');
+  downloadJSON(buildData(true), filename);
+}
+
+function downloadJSON(data, filename) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
