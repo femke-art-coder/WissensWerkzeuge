@@ -1,7 +1,7 @@
 # WissensWerkzeuge by Femke
 
 ## Vision
-In einer Welt von KI und Automatisierung sind strukturierte Daten das neue Gold. WissensWerkzeuge unterstützt Freelancer dabei, Dokumente wie Rechnungen und Angebote nicht nur als PDF, sondern in maschinenlesbaren Formaten zu erstellen, um auf die kommende E-Rechnungspflicht (2025-2028) vorbereitet zu sein.
+In einer Welt von KI und Automatisierung sind strukturierte Daten das neue Gold. WissensWerkzeuge unterstützt Freelancer dabei, Dokumente wie Rechnungen und Angebote nicht nur als PDF, sondern in maschinenlesbaren Formaten zu erstellen, um auf die kommende E-Rechnungspflicht vorbereitet zu sein.
 
 ## Methodik & Tools
 Das Projekt demonstriert den strategischen Einsatz moderner Entwicklungswerkzeuge:
