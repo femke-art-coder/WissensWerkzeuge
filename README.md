@@ -1,5 +1,5 @@
 # WissensWerkzeuge by Femke
-
+Live Demo: https://femke-art-coder.github.io/WissensWerkzeuge/
 ## Vision
 In einer Welt von KI und Automatisierung sind strukturierte Daten das neue Gold. WissensWerkzeuge unterstützt Freelancer dabei, Dokumente wie Rechnungen und Angebote nicht nur als PDF, sondern in maschinenlesbaren Formaten zu erstellen, um auf die kommende E-Rechnungspflicht vorbereitet zu sein.
 
