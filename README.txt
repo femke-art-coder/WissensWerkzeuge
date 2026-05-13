@@ -26,24 +26,16 @@ This is Phantom, a simple design built around a grid of large, colorful, semi-in
 image tiles (of which you can have as many or as few as you like). Makes use of some
 SVG and animation techniques I've been experimenting with on that other project of mine
 you may have heard about (https://carrd.co), and includes a handy generic page for whatever.
-
 Demo images* courtesy of Unsplash, a radtastic collection of CC0 (public domain) images
 you can use for pretty much whatever.
-
 (* = not included)
-
 AJ
 aj@lkn.io | @ajlkn
-
-
 Credits:
-
-	Demo Images:
+Demo Images:
 		Unsplash (unsplash.com)
-
-	Icons:
+Icons:
 		Font Awesome (fontawesome.io)
-
-	Other:
+Other:
 		jQuery (jquery.com)
 		Responsive Tools (github.com/ajlkn/responsive-tools)
