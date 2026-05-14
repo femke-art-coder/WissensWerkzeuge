@@ -11,10 +11,10 @@ Das Projekt demonstriert den strategischen Einsatz moderner Entwicklungswerkzeug
 * **Frontend-Basis:** Verwendung und Anpassung einer Open-Source-Vorlage von GitHub.
 
 ## Warum dieses Projekt?
-WissensWerkzeuge ist der "kleine Bruder" meines großen Innovationskonzepts **Sommersprint**. Es zeigt meine Fähigkeit, kaufmännische Notwendigkeiten (Rechtskonformität, Belegwesen) in technische Lösungen zu übersetzen.
+Es zeigt meine Fähigkeit, kaufmännische Notwendigkeiten (Rechtskonformität, Belegwesen) in technische Lösungen zu übersetzen.
 
-## Status
-Funktionaler Prototyp / Arbeitsprobe zur Demonstration der Architektur-Kompetenz.
+## Status: noch nicht abgeschlossen 
+Einfacher Prototyp / Arbeitsprobe zur Demonstration der Architektur-Kompetenz.
 
 Vorlage:
 Phantom by HTML5 UP
