@@ -77,8 +77,8 @@ body>#wrapper>header:first-child nav ul li a:hover {
 #header {
 	background: linear-gradient(135deg, #1a1a2e 0%, #2d2b55 60%, #4a3f7a 100%);
 	color: #f0ecff;
-	padding: 4rem 1.5rem 3.5rem;
-	text-align: center;
+	padding: 3rem 0;
+	text-align: left;
 }
 
 #header .logo h1 {
@@ -87,6 +87,7 @@ body>#wrapper>header:first-child nav ul li a:hover {
 	letter-spacing: 0.03em;
 	margin-bottom: 1.2rem;
 	color: #fff;
+	text-align: center;
 }
 
 #header .logo p {
@@ -117,7 +118,7 @@ body>#wrapper>header:first-child nav ul li a:hover {
 }
 
 .beschreibung header p {
-	text-align: center;
+	text-align: left;
 	color: #3a3a4a;
 	font-size: 0.97rem;
 	line-height: 1.85;
